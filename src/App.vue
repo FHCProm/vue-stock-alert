@@ -56,6 +56,31 @@
         aria-controls="docsearch-list"
         v-model="searchQuery"
       />
+      <button
+        type="button"
+        title="enter the query"
+        class="DocSearch-Enter"
+        aria-label="enter the query"
+      >
+        Enter
+      </button>
+      <button
+        type="reset"
+        title="Clear the query"
+        class="DocSearch-Reset"
+        aria-label="Clear the query"
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20">
+          <path
+            d="M10 10l5.09-5.09L10 10l5.09 5.09L10 10zm0 0L4.91 4.91 10 10l-5.09 5.09L10 10z"
+            stroke="currentColor"
+            fill="none"
+            fill-rule="evenodd"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      </button>
     </form>
   </div>
   <div class="DocSearch-Dropdown">
@@ -107,6 +132,10 @@ const searchResult = ref([
   color: white;
 }
 
+::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+}
+
 .DocSearch-SearchBar {
   display: flex;
   padding: 12px 12px 0;
@@ -153,10 +182,23 @@ const searchResult = ref([
   animation: 0.1s ease-in forwards f;
   appearance: none;
   background: none;
-  border-radius: 50%;
   color: white;
   padding: 2px;
+  border: none;
   right: 0;
+}
+
+.DocSearch-Reset:hover {
+  color: #00aeff;
+}
+
+.DocSearch-Enter {
+  border: 0.5px solid white;
+
+  color: #f5f6f7;
+  background-color: transparent;
+  font-size: 15px;
+  margin-right: 20px;
 }
 
 .DocSearch-Dropdown {
@@ -228,9 +270,9 @@ const searchResult = ref([
 .DocSearch-Hit-content-wrapper {
   display: flex;
   flex: 1 1 auto;
-  flex-direction: column;
+  flex-direction: row;
   font-weight: 500;
-  justify-content: center;
+  justify-content: space-between;
   line-height: 1.2em;
   margin: 0 8px;
   position: relative;

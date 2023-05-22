@@ -24,7 +24,9 @@
           </svg>
         </div>
         <div class="DocSearch-Hit-content-wrapper">
+          <span class="DocSearch-Hit-symbol">{{ item.symbol }}</span>
           <span class="DocSearch-Hit-title">{{ item.name }}</span>
+          <span class="DocSearch-Hit-currency">{{ item.currency }}</span>
         </div>
         <div class="DocSearch-Hit-action" v-if="highlighted">
           <svg
@@ -55,10 +57,12 @@ const searchResult = ref([
   {
     name: "Tesla",
     symbol: "TSLA",
+    currency: "USD",
   },
   {
     name: "Microsoft",
     symbol: "MSFT",
+    currency: "USD",
   },
 ]);
 const highlighted = ref(false);
