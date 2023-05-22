@@ -1,6 +1,6 @@
 <template>
   <div class="DocSearch-SearchBar">
-    <form class="DocSearch-Form">
+    <form class="DocSearch-Form" @submit.prevent="handleSearch">
       <label
         class="DocSearch-MagnifierLabel"
         for="docsearch-input"
@@ -51,13 +51,13 @@
         spellcheck="false"
         placeholder="Search stock symbol"
         maxlength="64"
-        type="search"
+        type="text"
         aria-activedescendant="docsearch-item-0"
         aria-controls="docsearch-list"
         v-model="searchQuery"
       />
       <button
-        type="button"
+        type="submit"
         title="enter the query"
         class="DocSearch-Enter"
         aria-label="enter the query"
@@ -108,7 +108,7 @@
     </div>
     <section class="DocSearch-Hits">
       <ul role="listbox" aria-labelledby="docsearch-label" id="docsearch-list">
-        <SearchResultList></SearchResultList>
+        <SearchResultList :search-result="searchResult"></SearchResultList>
       </ul>
     </section>
   </div>
@@ -119,12 +119,46 @@ import SearchResultList from "./components/SearchResultList.vue";
 import { ref } from "vue";
 
 const searchQuery = ref("");
-const searchResult = ref([
+
+const searchResult = ref([]);
+
+const storage = ref([
   {
     name: "Tesla",
     symbol: "TSLA",
+    currency: "USD",
+  },
+  {
+    name: "Microsoft",
+    symbol: "MSFT",
+    currency: "USD",
+  },
+  {
+    name: "Apple",
+    symbol: "AAPL",
+    currency: "USD",
+  },
+  {
+    name: "Bitcoin",
+    symbol: "BTC",
+    currency: "USD",
   },
 ]);
+
+function handleSearch() {
+  let matches = [];
+
+  for (const result of storage.value) {
+    if (
+      result.symbol.toUpperCase().startsWith(searchQuery.value.toUpperCase()) &&
+      searchQuery.value !== ""
+    ) {
+      matches.push(result);
+    }
+  }
+
+  searchResult.value = matches;
+}
 </script>
 
 <style>
@@ -230,65 +264,5 @@ const searchResult = ref([
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.DocSearch-Hit a {
-  background: #090a11;
-  border-radius: 4px;
-  text-decoration: none;
-  display: block;
-  padding-left: 12px;
-  width: 100%;
-  color: #7f8497;
-}
-
-.DocSearch-Hit {
-  border-radius: 4px;
-  display: flex;
-  padding-bottom: 4px;
-  position: relative;
-}
-.DocSearch-Hit[aria-selected="true"] a {
-  background-color: #00aeff;
-  color: white;
-}
-
-.DocSearch-Hit-Container {
-  align-items: center;
-
-  display: flex;
-  flex-direction: row;
-  height: 56px;
-  padding: 0 12px 0 0;
-}
-
-.DocSearch-Hit-icon {
-  height: 20px;
-  width: 20px;
-}
-
-.DocSearch-Hit-content-wrapper {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: row;
-  font-weight: 500;
-  justify-content: space-between;
-  line-height: 1.2em;
-  margin: 0 8px;
-  position: relative;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 80%;
-}
-
-.DocSearch-Hit-title {
-  font-size: 1.5em;
-}
-
-.DocSearch-Hit-action {
-  align-items: center;
-  display: flex;
-  height: 22px;
-  width: 22px;
 }
 </style>
