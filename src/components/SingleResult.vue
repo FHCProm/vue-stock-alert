@@ -1,5 +1,9 @@
 <template>
-  <a href="#" @mouseover="highlighted = true" @mouseleave="highlighted = false"
+  <a
+    href="#"
+    @mouseover="highlighted = true"
+    @mouseleave="highlighted = false"
+    @keydown.enter.prevent="addSymbol"
     ><div class="DocSearch-Hit-Container">
       <div class="DocSearch-Hit-icon">
         <svg width="20" height="20" viewBox="0 0 20 20">
@@ -58,6 +62,10 @@ const props = defineProps({
   },
 });
 const highlighted = ref(false);
+
+function addSymbol() {
+  console.log(props.symbol);
+}
 </script>
 
 <style scoped>
@@ -100,7 +108,7 @@ const highlighted = ref(false);
 }
 
 .DocSearch-Hit-title {
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 .DocSearch-Hit-action {
