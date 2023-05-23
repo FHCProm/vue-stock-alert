@@ -45,9 +45,7 @@
               />
             </svg>
           </a>
-          <a class="cp ml24 BLUE btc-withdraw svelte-o95zkd" href="#"
-            >Withdraw</a
-          >
+
           <a class="ml24 cp BLUE btc-deposit svelte-o95zkd" href="#">Remove</a>
         </div>
       </div>
@@ -66,7 +64,6 @@
   border-radius: 12px;
 }
 .mt20 {
-  margin-top: 20px;
 }
 
 .grid.svelte-q2f2pt {
