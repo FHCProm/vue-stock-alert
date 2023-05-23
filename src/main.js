@@ -1,4 +1,9 @@
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from "vue";
+import App from "./App.vue";
+import devtools from "@vue/devtools";
 
-createApp(App).mount('#app')
+if (process.env.NODE_ENV === "development") {
+  devtools.connect(/* host, port */);
+}
+
+createApp(App).mount("#app");
