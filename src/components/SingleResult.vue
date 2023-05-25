@@ -45,6 +45,7 @@
 
 <script setup>
 import { defineProps, ref } from "vue";
+
 const props = defineProps({
   symbol: {
     type: String,
@@ -64,7 +65,29 @@ const props = defineProps({
 const highlighted = ref(false);
 
 function addSymbol() {
-  console.log(props.symbol);
+  // const { remote } = require("electron");
+  // const fs = remote.require("fs");
+  // if (fs.existsSync("@/storage/symbols/AAPL.json")) {
+  //   console.log("The file exists");
+  // } else {
+  //   console.log("The file does not exist");
+  // }
+
+  const fs = window.require("fs");
+  const path = "./src/storage/symbols/AAPL.json";
+
+  try {
+    if (fs.existsSync(path)) {
+      const data = { name: "John", age: 30 };
+
+      fs.writeFileSync(path, JSON.stringify(data), { flag: "w" });
+      console.log("data is already added");
+    } else {
+      console.log("file not exists");
+    }
+  } catch (err) {
+    console.log(err);
+  }
 }
 </script>
 

@@ -15,6 +15,7 @@
   "main": "background.js",
   "dependencies": {
     "core-js": "^3.6.5",
+    "original-fs": "^1.2.0",
     "vue": "^3.0.0"
   },
   "devDependencies": {
