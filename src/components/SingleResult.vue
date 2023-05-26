@@ -64,30 +64,55 @@ const props = defineProps({
 });
 const highlighted = ref(false);
 
-function addSymbol() {
-  // const { remote } = require("electron");
-  // const fs = remote.require("fs");
-  // if (fs.existsSync("@/storage/symbols/AAPL.json")) {
-  //   console.log("The file exists");
-  // } else {
-  //   console.log("The file does not exist");
-  // }
+import apiCredential from "@/storage/dataStatus.json";
+const api_key = apiCredential["api_key"];
 
+function addSymbol() {
   const fs = window.require("fs");
-  const path = "./src/storage/symbols/AAPL.json";
+  const path = window.require("path");
+  const folderPath = "./src/storage/symbols";
+  const symbol = `${props.symbol}.json`;
+
+  const filePath = path.join(folderPath, symbol);
 
   try {
-    if (fs.existsSync(path)) {
-      const data = { name: "John", age: 30 };
-
-      fs.writeFileSync(path, JSON.stringify(data), { flag: "w" });
-      console.log("data is already added");
+    if (fs.existsSync(filePath)) {
+      console.log("symbol has been added");
     } else {
-      console.log("file not exists");
+      fs.writeFile(filePath, "", function (err) {
+        if (err) throw err;
+        console.log(`${filePath} created`);
+        //getDataFromAlphaVantage();
+      });
     }
   } catch (err) {
     console.log(err);
   }
+}
+
+function getDataFromAlphaVantage() {
+  var request = window.require("request");
+
+  // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
+  var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbol}&apikey=${api_key}`;
+
+  fetch(url, {
+    headers: {
+      "User-Agent": "request",
+    },
+  })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((error) => {
+      console.error(`Fetch error: ${error}`);
+    });
 }
 </script>
 

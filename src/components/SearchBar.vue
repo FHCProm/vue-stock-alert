@@ -134,7 +134,7 @@ const searchQuery = ref("");
 const searchResult = ref([]);
 const searchResultVisibility = ref("none");
 
-const storage = ref([
+const stockListAvailableFromAlphaVantage = ref([
   {
     name: "Tesla",
     symbol: "TSLA",
@@ -170,8 +170,10 @@ const storage = ref([
 function handleSearch() {
   searchResultVisibility.value = "unset";
   let matches = [];
+  stockListAvailableFromAlphaVantage.value =
+    validateSymbolAvailability(searchQuery);
 
-  for (const result of storage.value) {
+  for (const result of stockListAvailableFromAlphaVantage.value) {
     if (
       result.symbol.toUpperCase().startsWith(searchQuery.value.toUpperCase()) &&
       searchQuery.value !== ""
@@ -185,6 +187,10 @@ function handleSearch() {
 
 function changeSearchResultVisibility() {
   searchResultVisibility.value = "none";
+}
+
+function validateSymbolAvailability(userInput) {
+  return [{}];
 }
 </script>
 
