@@ -38,6 +38,17 @@ const selectedIndex = ref(0);
   padding-bottom: 4px;
   position: relative;
 }
+
+.DocSearch-Hit a {
+  background: #090a11;
+  border-radius: 4px;
+  text-decoration: none;
+  display: block;
+  padding-left: 12px;
+  width: 100%;
+  color: #7f8497;
+}
+
 .DocSearch-Hit[aria-selected="true"] a {
   background-color: #00aeff;
   color: white;

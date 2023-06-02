@@ -129,6 +129,7 @@
 <script setup>
 import SearchResultList from "./SearchResultList.vue";
 import { ref } from "vue";
+import fileSystemRead from "../utility-functions/fs-read";
 
 const searchQuery = ref("");
 const searchResult = ref([]);
@@ -189,8 +190,15 @@ function changeSearchResultVisibility() {
   searchResultVisibility.value = "none";
 }
 
-function validateSymbolAvailability(userInput) {
-  return [{}];
+async function validateSymbolAvailability(userInput) {
+  const api_key = fileSystemRead().readFromDataStatus();
+
+  const api_link = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${userInput.value}&apikey=${api_key}`;
+  const response = await fetch(api_link);
+  const options = await response.json();
+  console.log(options.bestMatches);
+
+  return options.bestMatches;
 }
 </script>
 

@@ -117,19 +117,8 @@ function getDataFromAlphaVantage() {
 </script>
 
 <style scoped>
-.DocSearch-Hit a {
-  background: #090a11;
-  border-radius: 4px;
-  text-decoration: none;
-  display: block;
-  padding-left: 12px;
-  width: 100%;
-  color: #7f8497;
-}
-
 .DocSearch-Hit-Container {
   align-items: center;
-
   display: flex;
   flex-direction: row;
   height: 56px;
