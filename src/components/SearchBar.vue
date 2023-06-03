@@ -129,64 +129,19 @@
 <script setup>
 import SearchResultList from "./SearchResultList.vue";
 import { ref } from "vue";
-import fileSystemRead from "../utility-functions/fs-read";
+import fileSystemRead from "@/utility-functions/fs-read";
 
 const searchQuery = ref("");
 const searchResult = ref([]);
 const searchResultVisibility = ref("none");
 
-const stockListAvailableFromAlphaVantage = ref([
-  {
-    name: "Tesla",
-    symbol: "TSLA",
-    currency: "USD",
-  },
-  {
-    name: "Microsoft",
-    symbol: "MSFT",
-    currency: "USD",
-  },
-  {
-    name: "Apple",
-    symbol: "AAPL",
-    currency: "USD",
-  },
-  {
-    name: "Amazon",
-    symbol: "AMZN",
-    currency: "USD",
-  },
-  {
-    name: "Gold Spot",
-    symbol: "XAUUSD",
-    currency: "USD",
-  },
-  {
-    name: "Bitcoin",
-    symbol: "BTC",
-    currency: "USD",
-  },
-]);
-
-function handleSearch() {
+async function handleSearch() {
   searchResultVisibility.value = "unset";
-  let matches = [];
-  stockListAvailableFromAlphaVantage.value =
-    validateSymbolAvailability(searchQuery);
-
-  for (const result of stockListAvailableFromAlphaVantage.value) {
-    if (
-      result.symbol.toUpperCase().startsWith(searchQuery.value.toUpperCase()) &&
-      searchQuery.value !== ""
-    ) {
-      matches.push(result);
-    }
-  }
-
-  searchResult.value = matches;
+  searchResult.value = await validateSymbolAvailability(searchQuery);
 }
 
 function changeSearchResultVisibility() {
+  //searchResult.value = [];
   searchResultVisibility.value = "none";
 }
 
@@ -196,7 +151,6 @@ async function validateSymbolAvailability(userInput) {
   const api_link = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${userInput.value}&apikey=${api_key}`;
   const response = await fetch(api_link);
   const options = await response.json();
-  console.log(options.bestMatches);
 
   return options.bestMatches;
 }

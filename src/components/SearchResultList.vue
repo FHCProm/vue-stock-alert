@@ -1,7 +1,7 @@
 <template>
   <li
     v-for="(item, index) in props.searchResult"
-    :key="item.name"
+    :key="item['1. symbol']"
     class="DocSearch-Hit"
     id="docsearch-item-0"
     role="option"
@@ -9,9 +9,9 @@
     @click="selectedIndex = index"
   >
     <SingleResult
-      :symbol="item.symbol"
-      :name="item.name"
-      :currency="item.currency"
+      :symbol="item['1. symbol']"
+      :name="item['2. name']"
+      :currency="item['8. currency']"
     ></SingleResult>
   </li>
 </template>

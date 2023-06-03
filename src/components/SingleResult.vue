@@ -93,7 +93,6 @@ function addSymbol() {
 function getDataFromAlphaVantage() {
   var request = window.require("request");
 
-  // replace the "demo" apikey below with your own key from https://www.alphavantage.co/support/#api-key
   var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbol}&apikey=${api_key}`;
 
   fetch(url, {
