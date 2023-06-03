@@ -67,7 +67,7 @@ const highlighted = ref(false);
 import apiCredential from "@/storage/dataStatus.json";
 const api_key = apiCredential["api_key"];
 
-function addSymbol() {
+async function addSymbol() {
   const fs = window.require("fs");
   const path = window.require("path");
   const folderPath = "./src/storage/symbols";
@@ -79,11 +79,15 @@ function addSymbol() {
     if (fs.existsSync(filePath)) {
       console.log("symbol has been added");
     } else {
-      fs.writeFile(filePath, "", function (err) {
-        if (err) throw err;
-        console.log(`${filePath} created`);
-        //getDataFromAlphaVantage();
-      });
+      const stockMonthlyPrice = await getDataFromAlphaVantage();
+      fs.writeFile(
+        filePath,
+        JSON.stringify(stockMonthlyPrice["Monthly Time Series"]),
+        function (err) {
+          if (err) throw err;
+          console.log(`${filePath} created`);
+        }
+      );
     }
   } catch (err) {
     console.log(err);
@@ -95,7 +99,7 @@ function getDataFromAlphaVantage() {
 
   var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbol}&apikey=${api_key}`;
 
-  fetch(url, {
+  return fetch(url, {
     headers: {
       "User-Agent": "request",
     },
@@ -107,7 +111,7 @@ function getDataFromAlphaVantage() {
       return response.json();
     })
     .then((data) => {
-      console.log(data);
+      return data;
     })
     .catch((error) => {
       console.error(`Fetch error: ${error}`);
