@@ -80,10 +80,13 @@ async function addSymbol() {
       console.log("symbol has been added");
     } else {
       const stockMonthlyPrice = await getDataFromAlphaVantage();
+      let filteredData = reduceTheAmountOfMonthlyPricesData(
+        stockMonthlyPrice["Monthly Time Series"]
+      );
       let toWriteToFile = {
         company: props.name,
         symbol: props.symbol,
-        monthlyTime: stockMonthlyPrice["Monthly Time Series"],
+        monthlyTime: filteredData,
       };
       fs.writeFile(filePath, JSON.stringify(toWriteToFile), function (err) {
         if (err) throw err;
@@ -93,6 +96,18 @@ async function addSymbol() {
   } catch (err) {
     console.log(err);
   }
+}
+
+function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
+  let currentDate = new Date();
+  let filteredStockMonthlyPrices = {};
+  for (const key in originalMonthlyPrices) {
+    let specificDate = new Date(key);
+    if (currentDate.getTime() - specificDate.getTime() < 63114704000) {
+      filteredStockMonthlyPrices[`${key}`] = originalMonthlyPrices[`${key}`];
+    }
+  }
+  return filteredStockMonthlyPrices;
 }
 
 function getDataFromAlphaVantage() {

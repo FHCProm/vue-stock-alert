@@ -19,16 +19,32 @@
         </div>
       </div>
       <div class="svelte-o95zkd">
-        <span class="green-box">now</span>
+        <span
+          class="uncolored-box"
+          :style="{ borderColor: currentMonthStatus.candleColor }"
+          >now({{ currentMonthStatus.percentage }})</span
+        >
       </div>
       <div class="svelte-o95zkd">
-        <span class="red-box">1 month</span>
+        <span
+          class="uncolored-box"
+          :style="{ borderColor: lastMonthStatus.candleColor }"
+          >1 month({{ lastMonthStatus.percentage }}%)</span
+        >
       </div>
       <div class="svelte-o95zkd">
-        <span class="green-box">3 month</span>
+        <span
+          class="uncolored-box"
+          :style="{ borderColor: last3MonthStatus.candleColor }"
+          >3 month</span
+        >
       </div>
       <div class="svelte-o95zkd">
-        <span class="green-box">6 month</span>
+        <span
+          class="uncolored-box"
+          :style="{ borderColor: last6MonthStatus.candleColor }"
+          >6 month</span
+        >
       </div>
 
       <div class="df aic svelte-o95zkd">
@@ -54,40 +70,124 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
+import { defineProps, ref } from "vue";
 const props = defineProps({
   symbolData: {
     type: Object,
     required: true,
   },
 });
-let lastMonthStatus = {
-  candleColor: "green",
-  percentage: "10%",
-};
-let last3MonthStatus = {
-  candleColor: "red",
-  percentage: "20%",
-};
+let currentMonthStatus = ref({
+  candleColor: "gray",
+  percentage: "?",
+});
 
-let last6MonthStatus = {
-  candleColor: "green",
-  percentage: "46%",
-};
+let lastMonthStatus = ref({
+  candleColor: "gray",
+  percentage: "?",
+});
+let last3MonthStatus = ref({
+  candleColor: "gray",
+  percentage: "?",
+});
+
+let last6MonthStatus = ref({
+  candleColor: "gray",
+  percentage: "?",
+});
 
 if (props.symbolData != undefined) {
-  for (const key in props.symbolData.monthlyTime) {
-    let specificDate = new Date(key);
-    let specificDateMonth = new Date(key).getMonth();
-    let specificDateYear = new Date(key).getFullYear();
+  let specificDate;
+  let specificDateMonth;
+  let specificDateYear;
 
-    let currentDate = new Date();
-    let thisYear = currentDate.getFullYear();
+  let currentDate = new Date();
+
+  let currentMonthOpenAndClosePrice;
+  let lastMonthOpenAndClosePrice;
+
+  for (const key in props.symbolData.monthlyTime) {
+    specificDate = new Date(key);
+    specificDateMonth = specificDate.getMonth();
+    specificDateYear = specificDate.getFullYear();
+
+    //this is to get this month open and close price
+    if (
+      specificDateMonth == currentDate.getMonth() &&
+      specificDateYear == currentDate.getFullYear()
+    ) {
+      currentMonthOpenAndClosePrice = {
+        ...props.symbolData.monthlyTime[`${key}`],
+      };
+    }
+
+    //
+    //one section
+    //
+    //this is to get last month open and close price
+    let yearOfLastMonth = currentDate.getFullYear();
     let lastMonth = currentDate.getMonth() - 1;
-    if (specificDateMonth == lastMonth && specificDateYear == thisYear) {
-      console.log(props.symbolData.monthlyTime[`${key}`]);
+
+    //if current month is january , there will be bug if we dont add this.
+    if (lastMonth < 0) {
+      lastMonth = 11;
+      yearOfLastMonth -= 1;
+    }
+    if (specificDateMonth == lastMonth && specificDateYear == yearOfLastMonth) {
+      lastMonthOpenAndClosePrice = {
+        ...props.symbolData.monthlyTime[`${key}`],
+      };
     }
   }
+
+  //
+  //
+  //this is for current month status
+  //
+  //
+  let currentMonthPercentageChange = getPercentageChanged(
+    currentMonthOpenAndClosePrice["1. open"],
+    currentMonthOpenAndClosePrice["4. close"]
+  );
+  if (
+    currentMonthOpenAndClosePrice["4. close"] -
+      currentMonthOpenAndClosePrice["1. open"] >=
+    0
+  ) {
+    currentMonthStatus.value.candleColor = "green";
+  } else {
+    currentMonthStatus.value.candleColor = "red";
+  }
+  currentMonthStatus.value.percentage = Math.abs(
+    currentMonthPercentageChange
+  ).toFixed(2);
+
+  //
+  //
+  //this is for last month status
+  //
+  //
+
+  let lastMonthPercentageChange = getPercentageChanged(
+    lastMonthOpenAndClosePrice["1. open"],
+    lastMonthOpenAndClosePrice["4. close"]
+  );
+
+  if (
+    lastMonthOpenAndClosePrice["4. close"] -
+      lastMonthOpenAndClosePrice["1. open"] >=
+    0
+  ) {
+    lastMonthStatus.value.candleColor = "green";
+  } else {
+    lastMonthStatus.value.candleColor = "red";
+  }
+  lastMonthStatus.value.percentage = Math.abs(
+    lastMonthPercentageChange
+  ).toFixed(2);
+}
+function getPercentageChanged(open, close) {
+  return ((close - open) / open) * 100;
 }
 </script>
 
@@ -169,13 +269,8 @@ body img {
   margin-left: 24px;
 }
 
-.red-box {
-  border: 0.5px solid red;
-  padding: 4px 8px;
-}
-
-.green-box {
-  border: 0.5px solid green;
+.uncolored-box {
+  border: 0.5px solid gray;
   padding: 4px 8px;
 }
 
