@@ -141,7 +141,7 @@ async function handleSearch() {
 }
 
 function changeSearchResultVisibility() {
-  //searchResult.value = [];
+  searchResult.value = [];
   searchResultVisibility.value = "none";
 }
 

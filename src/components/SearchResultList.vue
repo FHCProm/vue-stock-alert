@@ -8,18 +8,18 @@
     :aria-selected="index === selectedIndex"
     @click="selectedIndex = index"
   >
-    <SingleResult
+    <SingleSearchResult
       :symbol="item['1. symbol']"
       :name="item['2. name']"
       :currency="item['8. currency']"
-    ></SingleResult>
+    ></SingleSearchResult>
   </li>
 </template>
 
 <script setup>
 import { ref, defineProps } from "vue";
 
-import SingleResult from "./SingleResult.vue";
+import SingleSearchResult from "./SingleSearchResult.vue";
 
 const props = defineProps({
   searchResult: {

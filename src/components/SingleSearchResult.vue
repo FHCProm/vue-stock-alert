@@ -80,14 +80,15 @@ async function addSymbol() {
       console.log("symbol has been added");
     } else {
       const stockMonthlyPrice = await getDataFromAlphaVantage();
-      fs.writeFile(
-        filePath,
-        JSON.stringify(stockMonthlyPrice["Monthly Time Series"]),
-        function (err) {
-          if (err) throw err;
-          console.log(`${filePath} created`);
-        }
-      );
+      let toWriteToFile = {
+        company: props.name,
+        symbol: props.symbol,
+        monthlyTime: stockMonthlyPrice["Monthly Time Series"],
+      };
+      fs.writeFile(filePath, JSON.stringify(toWriteToFile), function (err) {
+        if (err) throw err;
+        console.log(`${filePath} created`);
+      });
     }
   } catch (err) {
     console.log(err);
