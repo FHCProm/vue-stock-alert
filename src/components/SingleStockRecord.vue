@@ -22,7 +22,7 @@
         <span
           class="uncolored-box"
           :style="{ borderColor: currentMonthStatus.candleColor }"
-          >now({{ currentMonthStatus.percentage }})</span
+          >now({{ currentMonthStatus.percentage }}%)</span
         >
       </div>
       <div class="svelte-o95zkd">
@@ -102,10 +102,41 @@ if (props.symbolData != undefined) {
   let specificDateYear;
 
   let currentDate = new Date();
-
   let currentMonthOpenAndClosePrice;
   let lastMonthOpenAndClosePrice;
 
+  let yearOfLastMonth = currentDate.getFullYear();
+  let lastMonth = currentDate.getMonth() - 1;
+
+  //if current month is january , there will be bug if we dont add this.
+  if (lastMonth < 0) {
+    lastMonth = 11;
+    yearOfLastMonth -= 1;
+  }
+
+  //
+  //
+  //this is to get last 3 months candle.Get the opening month and closing month
+  //
+  //
+  let last3MonthOpenMonth;
+  let last3MonthCloseMonth;
+  let yearOflast3Months = yearOfLastMonth;
+  let foundOpenAndCloseMonth = false;
+  const closingMonths = [2, 5, 8, 11];
+  for (let x = lastMonth; foundOpenAndCloseMonth == false; x--) {
+    if (x < 0) {
+      x = 11;
+      yearOflast3Months -= 1;
+    }
+    if (closingMonths.includes(x)) {
+      last3MonthCloseMonth = x;
+      last3MonthOpenMonth = x - 2;
+      foundOpenAndCloseMonth = true;
+    }
+  }
+
+  //with all the necessary dates , now we loop through Alpha vantage data to get prices.
   for (const key in props.symbolData.monthlyTime) {
     specificDate = new Date(key);
     specificDateMonth = specificDate.getMonth();
@@ -121,23 +152,15 @@ if (props.symbolData != undefined) {
       };
     }
 
-    //
-    //one section
-    //
     //this is to get last month open and close price
-    let yearOfLastMonth = currentDate.getFullYear();
-    let lastMonth = currentDate.getMonth() - 1;
 
-    //if current month is january , there will be bug if we dont add this.
-    if (lastMonth < 0) {
-      lastMonth = 11;
-      yearOfLastMonth -= 1;
-    }
     if (specificDateMonth == lastMonth && specificDateYear == yearOfLastMonth) {
       lastMonthOpenAndClosePrice = {
         ...props.symbolData.monthlyTime[`${key}`],
       };
     }
+
+    //this is for future to get last 3 month open and close price.
   }
 
   //
