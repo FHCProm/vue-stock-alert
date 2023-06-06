@@ -36,14 +36,14 @@
         <span
           class="uncolored-box"
           :style="{ borderColor: last3MonthStatus.candleColor }"
-          >3 month</span
+          >3 month({{ last3MonthStatus.percentage }}%)</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
           :style="{ borderColor: last6MonthStatus.candleColor }"
-          >6 month</span
+          >6 month({{ last6MonthStatus.percentage }}%)</span
         >
       </div>
 
@@ -104,6 +104,8 @@ if (props.symbolData != undefined) {
   let currentDate = new Date();
   let currentMonthOpenAndClosePrice;
   let lastMonthOpenAndClosePrice;
+  let last3MonthOpenAndClosePrice = {};
+  let last6MonthOpenAndClosePrice = {};
 
   let yearOfLastMonth = currentDate.getFullYear();
   let lastMonth = currentDate.getMonth() - 1;
@@ -116,23 +118,45 @@ if (props.symbolData != undefined) {
 
   //
   //
-  //this is to get last 3 months candle.Get the opening month and closing month
+  //this is to get last 3 months candles.Get the opening month and closing month and year
   //
   //
   let last3MonthOpenMonth;
   let last3MonthCloseMonth;
   let yearOflast3Months = yearOfLastMonth;
-  let foundOpenAndCloseMonth = false;
-  const closingMonths = [2, 5, 8, 11];
-  for (let x = lastMonth; foundOpenAndCloseMonth == false; x--) {
+  let foundOpenAndClose3Month = false;
+  const closingMonthOf3Months = [2, 5, 8, 11];
+  for (let x = lastMonth; foundOpenAndClose3Month == false; x--) {
     if (x < 0) {
       x = 11;
       yearOflast3Months -= 1;
     }
-    if (closingMonths.includes(x)) {
+    if (closingMonthOf3Months.includes(x)) {
       last3MonthCloseMonth = x;
       last3MonthOpenMonth = x - 2;
-      foundOpenAndCloseMonth = true;
+      foundOpenAndClose3Month = true;
+    }
+  }
+
+  //
+  //
+  //this is to get last 6 months candles.Get the opening month and closing month
+  //
+  //
+  let last6MonthOpenMonth;
+  let last6MonthCloseMonth;
+  let yearOflast6Months = yearOfLastMonth;
+  let foundOpenAndClose6Month = false;
+  const closingMonthOf6Months = [5, 11];
+  for (let x = lastMonth; foundOpenAndClose6Month == false; x--) {
+    if (x < 0) {
+      x = 11;
+      yearOflast6Months -= 1;
+    }
+    if (closingMonthOf6Months.includes(x)) {
+      last6MonthCloseMonth = x;
+      last6MonthOpenMonth = x - 5;
+      foundOpenAndClose6Month = true;
     }
   }
 
@@ -160,7 +184,42 @@ if (props.symbolData != undefined) {
       };
     }
 
-    //this is for future to get last 3 month open and close price.
+    //this is to get last 3 month open and close price.
+    if (
+      specificDateMonth == last3MonthOpenMonth &&
+      specificDateYear == yearOflast3Months
+    ) {
+      last3MonthOpenAndClosePrice["open"] = {
+        ...props.symbolData.monthlyTime[`${key}`],
+      };
+    }
+
+    if (
+      specificDateMonth == last3MonthCloseMonth &&
+      specificDateYear == yearOflast3Months
+    ) {
+      last3MonthOpenAndClosePrice["close"] = {
+        ...props.symbolData.monthlyTime[`${key}`],
+      };
+    }
+
+    //this is to get last 6 month open and close price.
+    if (
+      specificDateMonth == last6MonthOpenMonth &&
+      specificDateYear == yearOflast6Months
+    ) {
+      last6MonthOpenAndClosePrice["open"] = {
+        ...props.symbolData.monthlyTime[`${key}`],
+      };
+    }
+    if (
+      specificDateMonth == last6MonthCloseMonth &&
+      specificDateYear == yearOflast6Months
+    ) {
+      last6MonthOpenAndClosePrice["close"] = {
+        ...props.symbolData.monthlyTime[`${key}`],
+      };
+    }
   }
 
   //
@@ -207,6 +266,53 @@ if (props.symbolData != undefined) {
   }
   lastMonthStatus.value.percentage = Math.abs(
     lastMonthPercentageChange
+  ).toFixed(2);
+
+  //
+  //
+  //this is for last 3 month status
+  //
+  //
+  let last3MonthPercentageChange = getPercentageChanged(
+    last3MonthOpenAndClosePrice.open["1. open"],
+    last3MonthOpenAndClosePrice.close["4. close"]
+  );
+  if (
+    last3MonthOpenAndClosePrice.close["4. close"] -
+      last3MonthOpenAndClosePrice.open["1. open"] >=
+    0
+  ) {
+    last3MonthStatus.value.candleColor = "green";
+  } else {
+    last3MonthStatus.value.candleColor = "red";
+  }
+  last3MonthStatus.value.percentage = Math.abs(
+    last3MonthPercentageChange
+  ).toFixed(2);
+
+  //
+  //
+  //this is for last 6 month status
+  //
+  //
+
+  let last6MonthPercentageChange = getPercentageChanged(
+    last6MonthOpenAndClosePrice.open["1. open"],
+    last6MonthOpenAndClosePrice.close["4. close"]
+  );
+
+  if (
+    last6MonthOpenAndClosePrice.close["4. close"] -
+      last6MonthOpenAndClosePrice.open["1. open"] >=
+    0
+  ) {
+    last6MonthStatus.value.candleColor = "green";
+  } else {
+    last6MonthStatus.value.candleColor = "red";
+  }
+
+  last6MonthStatus.value.percentage = Math.abs(
+    last6MonthPercentageChange
   ).toFixed(2);
 }
 function getPercentageChanged(open, close) {
