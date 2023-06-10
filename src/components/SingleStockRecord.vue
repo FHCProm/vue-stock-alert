@@ -6,6 +6,7 @@
       min-width: 900px;
       padding: 10px 16px;
     "
+    :class="{ rainbow: canTrade }"
   >
     <div class="row svelte-o95zkd" style="">
       <div class="df aic svelte-o95zkd">
@@ -71,12 +72,16 @@
 
 <script setup>
 import { defineProps, ref } from "vue";
+import { useTradingMode } from "@/stores/TradingMode";
+const tradingModeStore = useTradingMode();
+
 const props = defineProps({
   symbolData: {
     type: Object,
     required: true,
   },
 });
+let canTrade = ref(false);
 let currentMonthStatus = ref({
   candleColor: "gray",
   percentage: "?",
@@ -318,6 +323,17 @@ if (props.symbolData != undefined) {
 function getPercentageChanged(open, close) {
   return ((close - open) / open) * 100;
 }
+
+if (tradingModeStore.mode == "standard") {
+  if (
+    last6MonthStatus.value.candleColor == "green" &&
+    lastMonthStatus.value.candleColor == "red"
+  ) {
+    canTrade.value = true;
+  }
+} else {
+  canTrade.value = false;
+}
 </script>
 
 <style scoped>
@@ -409,5 +425,21 @@ body img {
   height: 20px;
   display: grid;
   justify-content: center;
+}
+
+.rainbow {
+  margin-top: 2px;
+  border: 2px solid;
+  border-image: linear-gradient(
+    to right,
+    red,
+    orange,
+    yellow,
+    green,
+    blue,
+    indigo,
+    violet
+  );
+  border-image-slice: 1;
 }
 </style>

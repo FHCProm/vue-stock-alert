@@ -70,6 +70,9 @@
 </template>
 
 <script setup>
+import { useTradingMode } from "@/stores/TradingMode";
+const tradingModeStore = useTradingMode();
+
 function handleClick(optionNumber) {
   const tabs = document.querySelectorAll('[role="tab"]');
   tabs.forEach((tab) => tab.setAttribute("aria-selected", "false"));
@@ -78,9 +81,11 @@ function handleClick(optionNumber) {
   const selectedOption = document.querySelector(
     `[role="tab"]:nth-child(${optionNumber})`
   );
-  selectedOption.setAttribute("selected", "");
-  selectedOption.setAttribute("aria-selected", "true");
+  selectedOption?.setAttribute("selected", "");
+  selectedOption?.setAttribute("aria-selected", "true");
+  tradingModeStore.setMode(selectedOption?.textContent);
 }
+console.log(tradingModeStore.mode);
 </script>
 
 <style scoped>
