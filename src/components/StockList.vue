@@ -1,6 +1,7 @@
 <template>
   <div class="wallet mt20 br12 svelte-o95zkd">
     <SingleStockRecord
+      ref="stockRecordReference"
       v-for="item in allStockMonthlyData"
       :key="item.filename"
       :symbol-data="item"
@@ -9,8 +10,9 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import SingleStockRecord from "./SingleStockRecord.vue";
+import { useTradingMode } from "@/stores/TradingMode";
 
 const fs = window.require("fs");
 const path = window.require("path");
@@ -33,6 +35,23 @@ fs.readdir(directoryPath, function (err, files) {
     });
   });
 });
+
+const tradingModeStore = useTradingMode();
+
+watch(
+  () => tradingModeStore.mode,
+  async (newMode) => {
+    resetAllStockRecord();
+  }
+);
+
+const stockRecordReference = ref(null);
+function resetAllStockRecord() {
+  for (let i = 0; i < stockRecordReference.value.length; i++) {
+    stockRecordReference.value[i].initiateColorChange();
+  }
+  console.log("resetting all stock record");
+}
 </script>
 
 <style scoped>

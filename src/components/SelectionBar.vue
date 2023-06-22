@@ -14,12 +14,11 @@
     >
       <yt-chip-cloud-chip-renderer
         @click="handleClick(1)"
-        class="style-scope ytd-feed-filter-chip-bar-renderer iron-selected"
-        aria-selected="true"
+        class="style-scope ytd-feed-filter-chip-bar-renderer"
+        aria-selected="false"
         role="tab"
         tabindex="0"
         chip-style="STYLE_HOME_FILTER"
-        selected=""
         ><!--css-build:shady--><!--css-build:shady-->
         <yt-formatted-string
           id="text"
@@ -38,6 +37,7 @@
         role="tab"
         tabindex="0"
         chip-style="STYLE_HOME_FILTER"
+        selected=""
         ><!--css-build:shady--><!--css-build:shady-->
         <yt-formatted-string
           id="text"
@@ -71,6 +71,7 @@
 
 <script setup>
 import { useTradingMode } from "@/stores/TradingMode";
+import { watch } from "vue";
 const tradingModeStore = useTradingMode();
 
 function handleClick(optionNumber) {
@@ -83,9 +84,16 @@ function handleClick(optionNumber) {
   );
   selectedOption?.setAttribute("selected", "");
   selectedOption?.setAttribute("aria-selected", "true");
-  tradingModeStore.setMode(selectedOption?.textContent);
+  if (optionNumber == 1) {
+    tradingModeStore.setMode("Fastest");
+  }
+  if (optionNumber == 2) {
+    tradingModeStore.setMode("Standard");
+  }
+  if (optionNumber == 3) {
+    tradingModeStore.setMode("Most Secure");
+  }
 }
-console.log(tradingModeStore.mode);
 </script>
 
 <style scoped>

@@ -324,16 +324,40 @@ function getPercentageChanged(open, close) {
   return ((close - open) / open) * 100;
 }
 
-if (tradingModeStore.mode == "standard") {
-  if (
-    last6MonthStatus.value.candleColor == "green" &&
-    lastMonthStatus.value.candleColor == "red"
-  ) {
-    canTrade.value = true;
-  }
-} else {
+function initiateColorChange() {
+  console.log("determining color change", tradingModeStore.mode);
   canTrade.value = false;
+  if (tradingModeStore.mode == "Standard") {
+    if (
+      last6MonthStatus.value.candleColor == "green" &&
+      lastMonthStatus.value.candleColor == "red"
+    ) {
+      canTrade.value = true;
+    }
+  }
+
+  if (tradingModeStore.mode == "Fastest") {
+    if (
+      last3MonthStatus.value.candleColor == "green" &&
+      lastMonthStatus.value.candleColor == "red"
+    ) {
+      canTrade.value = true;
+    }
+  }
+  if (tradingModeStore.mode == "Most Secure") {
+    if (
+      last6MonthStatus.value.candleColor == "green" &&
+      last3MonthStatus.value.candleColor == "red"
+    ) {
+      canTrade.value = true;
+    }
+  }
 }
+defineExpose({
+  initiateColorChange,
+});
+
+initiateColorChange();
 </script>
 
 <style scoped>

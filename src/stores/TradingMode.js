@@ -2,7 +2,7 @@ import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
 export const useTradingMode = defineStore("TradingMode", () => {
-  const mode = ref("standard");
+  const mode = ref("Standard");
   // const doubleCount = computed(() => {
   //   return count.value * 2;
   // });
