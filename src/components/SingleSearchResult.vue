@@ -83,10 +83,12 @@ async function addSymbol() {
       let filteredData = reduceTheAmountOfMonthlyPricesData(
         stockMonthlyPrice["Monthly Time Series"]
       );
+
       let toWriteToFile = {
         company: props.name,
         symbol: props.symbol,
         monthlyTime: filteredData,
+        lastUpdated: Date.now(),
       };
       fs.writeFile(filePath, JSON.stringify(toWriteToFile), function (err) {
         if (err) throw err;

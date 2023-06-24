@@ -50,7 +50,6 @@ function resetAllStockRecord() {
   for (let i = 0; i < stockRecordReference.value.length; i++) {
     stockRecordReference.value[i].initiateColorChange();
   }
-  console.log("resetting all stock record");
 }
 </script>
 
