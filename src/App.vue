@@ -69,6 +69,7 @@ async function getSymbolsWithOutdatedPrice() {
       symbolLastUpdated.getMonth() == todayDate.getMonth()
     ) {
       console.log("data up-to-date");
+      //outdatedSymbols.push(data["symbol"]);
     }
 
     if (
@@ -83,6 +84,7 @@ async function getSymbolsWithOutdatedPrice() {
 async function getSymbolPriceFromAlphaVantage() {
   const api_key = fileSystemRead().readFromDataStatus();
   let outdatedSymbolsCopy = [...outdatedSymbols];
+  tradingModeStore.progressBarTotalSymbol = outdatedSymbolsCopy.length;
 
   while (outdatedSymbolsCopy.length > 0) {
     var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${outdatedSymbolsCopy[0]}&apikey=${api_key}`;
@@ -101,6 +103,7 @@ async function getSymbolPriceFromAlphaVantage() {
         );
         newSymbolPriceList[`${outdatedSymbolsCopy[0]}`] = newPriceData;
         outdatedSymbolsCopy.shift();
+        tradingModeStore.progressBarLoadedSymbol++;
       }
     } catch (error) {
       console.error(error);
@@ -109,7 +112,7 @@ async function getSymbolPriceFromAlphaVantage() {
   }
 }
 function saveUpdatedPriceToStorage() {
-  console.log("here is the fucking problem", outdatedSymbols.length);
+  let errorWhenSaving = false;
   for (let x = 0; x < outdatedSymbols.length; x++) {
     let symbolPath = `./src/storage/symbols/${outdatedSymbols[x]}.json`;
     const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
@@ -120,7 +123,22 @@ function saveUpdatedPriceToStorage() {
       fs.writeFileSync(symbolPath, JSON.stringify(data));
     } catch (e) {
       console.log(e);
+      errorWhenSaving = true;
     }
+  }
+  if (!errorWhenSaving) {
+    updateDataStatusJson();
+  }
+}
+
+function updateDataStatusJson() {
+  const path = "./src/storage/dataStatus.json";
+  const data = JSON.parse(fs.readFileSync(path, "utf-8"));
+  data["last_updated"] = Math.floor(Date.now() / 1000);
+  try {
+    fs.writeFileSync(path, JSON.stringify(data));
+  } catch (e) {
+    console.log(e);
   }
 }
 

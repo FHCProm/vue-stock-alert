@@ -33,11 +33,12 @@ defineExpose({
 });
 
 onMounted(() => {
-  ReadStockDataFromStorage;
+  ReadStockDataFromStorage();
   console.log(tradingModeStore.allStockMonthlyData);
 });
 
 function ReadStockDataFromStorage() {
+  tradingModeStore.allStockMonthlyData = [];
   fs.readdir(directoryPath, function (err, files) {
     if (err) {
       return console.log("Unable to scan directory: " + err);

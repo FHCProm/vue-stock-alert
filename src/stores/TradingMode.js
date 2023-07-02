@@ -5,6 +5,9 @@ export const useTradingMode = defineStore("TradingMode", () => {
   const mode = ref("Standard");
   const dataIsFullyLoaded = ref(true);
   const allStockMonthlyData = ref([]);
+  const progressBarLoadedSymbol = ref(0);
+  const progressBarTotalSymbol = ref(0);
+
   // const doubleCount = computed(() => {
   //   return count.value * 2;
   // });
@@ -12,5 +15,12 @@ export const useTradingMode = defineStore("TradingMode", () => {
     mode.value = value;
   }
 
-  return { mode, setMode, dataIsFullyLoaded, allStockMonthlyData };
+  return {
+    mode,
+    setMode,
+    dataIsFullyLoaded,
+    allStockMonthlyData,
+    progressBarLoadedSymbol,
+    progressBarTotalSymbol,
+  };
 });

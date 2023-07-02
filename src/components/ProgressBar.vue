@@ -1,6 +1,11 @@
 <template>
   <div v-if="!tradingModeStore.dataIsFullyLoaded" class="loader-wrapper">
-    <div class="loader-words">loading...</div>
+    <div class="loader-words">
+      loading...{{ tradingModeStore.progressBarLoadedSymbol }}/{{
+        tradingModeStore.progressBarTotalSymbol
+      }}
+    </div>
+
     <div class="loader"></div>
   </div>
   <div v-else class="loader-wrapper">
@@ -24,6 +29,7 @@
 
 <script setup>
 import { useTradingMode } from "@/stores/TradingMode";
+import { ref } from "vue";
 
 const tradingModeStore = useTradingMode();
 </script>
@@ -31,6 +37,7 @@ const tradingModeStore = useTradingMode();
 <style scoped>
 .loader-wrapper {
   display: flex;
+  align-items: center;
 }
 .loader-words {
   padding-right: 0.5rem;
