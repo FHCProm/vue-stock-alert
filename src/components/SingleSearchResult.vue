@@ -45,6 +45,8 @@
 
 <script setup>
 import { defineProps, ref } from "vue";
+import { useTradingMode } from "@/stores/TradingMode";
+import apiCredential from "@/storage/dataStatus.json";
 
 const props = defineProps({
   symbol: {
@@ -63,8 +65,8 @@ const props = defineProps({
   },
 });
 const highlighted = ref(false);
+const tradingModeStore = useTradingMode();
 
-import apiCredential from "@/storage/dataStatus.json";
 const api_key = apiCredential["api_key"];
 
 async function addSymbol() {
@@ -94,6 +96,7 @@ async function addSymbol() {
         if (err) throw err;
         console.log(`${filePath} created`);
       });
+      tradingModeStore.allStockMonthlyData.unshift(toWriteToFile);
     }
   } catch (err) {
     console.log(err);

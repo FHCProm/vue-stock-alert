@@ -326,7 +326,6 @@ function getPercentageChanged(open, close) {
 }
 
 function initiateColorChange() {
-  console.log("determining color change", tradingModeStore.mode);
   canTrade.value = false;
   if (tradingModeStore.mode == "Standard") {
     if (

@@ -68,7 +68,7 @@ async function getSymbolsWithOutdatedPrice() {
       symbolLastUpdated.getDate() == todayDate.getDate() &&
       symbolLastUpdated.getMonth() == todayDate.getMonth()
     ) {
-      console.log("it is already updated");
+      console.log("data up-to-date");
     }
 
     if (

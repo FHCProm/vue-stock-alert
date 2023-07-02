@@ -2,7 +2,7 @@
   <div class="wallet mt20 br12 svelte-o95zkd">
     <SingleStockRecord
       ref="stockRecordReference"
-      v-for="item in allStockMonthlyData"
+      v-for="item in tradingModeStore.allStockMonthlyData"
       :key="item.filename"
       :symbol-data="item"
     ></SingleStockRecord>
@@ -18,7 +18,7 @@ const fs = window.require("fs");
 const path = window.require("path");
 
 const directoryPath = "./src/storage/symbols";
-let allStockMonthlyData = ref([]);
+//let allStockMonthlyData = ref([]);
 const tradingModeStore = useTradingMode();
 
 watch(
@@ -34,6 +34,7 @@ defineExpose({
 
 onMounted(() => {
   ReadStockDataFromStorage;
+  console.log(tradingModeStore.allStockMonthlyData);
 });
 
 function ReadStockDataFromStorage() {
@@ -49,7 +50,7 @@ function ReadStockDataFromStorage() {
           return;
         }
         let singleStock = JSON.parse(data);
-        allStockMonthlyData.value.push(singleStock);
+        tradingModeStore.allStockMonthlyData.push(singleStock);
       });
     });
   });
