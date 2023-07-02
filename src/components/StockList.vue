@@ -10,7 +10,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 import SingleStockRecord from "./SingleStockRecord.vue";
 import { useTradingMode } from "@/stores/TradingMode";
 
@@ -19,23 +19,6 @@ const path = window.require("path");
 
 const directoryPath = "./src/storage/symbols";
 let allStockMonthlyData = ref([]);
-fs.readdir(directoryPath, function (err, files) {
-  if (err) {
-    return console.log("Unable to scan directory: " + err);
-  }
-
-  files.forEach((file) => {
-    fs.readFile(path.join(directoryPath, file), "utf8", (err, data) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      let singleStock = JSON.parse(data);
-      allStockMonthlyData.value.push(singleStock);
-    });
-  });
-});
-
 const tradingModeStore = useTradingMode();
 
 watch(
@@ -44,6 +27,33 @@ watch(
     resetAllStockRecord();
   }
 );
+
+defineExpose({
+  ReadStockDataFromStorage,
+});
+
+onMounted(() => {
+  ReadStockDataFromStorage;
+});
+
+function ReadStockDataFromStorage() {
+  fs.readdir(directoryPath, function (err, files) {
+    if (err) {
+      return console.log("Unable to scan directory: " + err);
+    }
+
+    files.forEach((file) => {
+      fs.readFile(path.join(directoryPath, file), "utf8", (err, data) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        let singleStock = JSON.parse(data);
+        allStockMonthlyData.value.push(singleStock);
+      });
+    });
+  });
+}
 
 const stockRecordReference = ref(null);
 function resetAllStockRecord() {

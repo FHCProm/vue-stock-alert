@@ -107,8 +107,8 @@ if (props.symbolData != undefined) {
   let specificDateYear;
 
   let currentDate = new Date();
-  let currentMonthOpenAndClosePrice;
-  let lastMonthOpenAndClosePrice;
+  let currentMonthOpenAndClosePrice = {};
+  let lastMonthOpenAndClosePrice = {};
   let last3MonthOpenAndClosePrice = {};
   let last6MonthOpenAndClosePrice = {};
 
@@ -232,6 +232,7 @@ if (props.symbolData != undefined) {
   //this is for current month status
   //
   //
+
   let currentMonthPercentageChange = getPercentageChanged(
     currentMonthOpenAndClosePrice["1. open"],
     currentMonthOpenAndClosePrice["4. close"]

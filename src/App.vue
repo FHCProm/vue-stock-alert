@@ -1,7 +1,7 @@
 <template>
   <SearchBar></SearchBar>
   <SelectionBar></SelectionBar>
-  <StockList></StockList>
+  <StockList ref="stockListReference"></StockList>
 </template>
 
 <script setup>
@@ -9,12 +9,28 @@ import SearchBar from "./components/SearchBar.vue";
 import StockList from "./components/StockList.vue";
 import SelectionBar from "./components/SelectionBar.vue";
 import fileSystemRead from "@/utility-functions/fs-read";
+import commonUtil from "./utility-functions/common-utility";
+import { onMounted, ref } from "vue";
+import { useTradingMode } from "@/stores/TradingMode";
 
 const fs = window.require("fs");
 const moment = require("moment");
+let outdatedSymbols = [];
 
-checkDataStatusJson();
-checkSymbolStockPrice();
+let newSymbolPriceList = {};
+const tradingModeStore = useTradingMode();
+const stockListReference = ref(null);
+
+onMounted(async () => {
+  if (checkDataStatusJson() == "outdated") {
+    tradingModeStore.dataIsFullyLoaded = false;
+    await getSymbolsWithOutdatedPrice();
+    await getSymbolPriceFromAlphaVantage();
+    saveUpdatedPriceToStorage();
+    stockListReference.value.ReadStockDataFromStorage();
+    tradingModeStore.dataIsFullyLoaded = true;
+  }
+});
 
 function checkDataStatusJson() {
   const data = JSON.parse(
@@ -28,12 +44,14 @@ function checkDataStatusJson() {
     moment.unix(unixTimestamp).format("YYYY-MM-DD")
   ) {
     console.log("loading new data right now");
+    return "outdated";
   } else {
     console.log("you have just reloaded the data for today");
+    return "updated";
   }
 }
 
-async function checkSymbolStockPrice() {
+async function getSymbolsWithOutdatedPrice() {
   let directoryPath = "./src/storage/symbols";
   let allSymbols = [];
   allSymbols = await fileSystemRead().readDir(directoryPath);
@@ -57,23 +75,51 @@ async function checkSymbolStockPrice() {
       symbolLastUpdated.getDate() != todayDate.getDate() ||
       symbolLastUpdated.getMonth() != todayDate.getMonth()
     ) {
-      const api_key = fileSystemRead().readFromDataStatus();
+      outdatedSymbols.push(data["symbol"]);
+    }
+  }
+}
 
-      var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${data["symbol"]}&apikey=${api_key}`;
+async function getSymbolPriceFromAlphaVantage() {
+  const api_key = fileSystemRead().readFromDataStatus();
+  let outdatedSymbolsCopy = [...outdatedSymbols];
 
-      try {
-        const response = await fetch(url);
-        const alphaVantageData = await response.json();
+  while (outdatedSymbolsCopy.length > 0) {
+    var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${outdatedSymbolsCopy[0]}&apikey=${api_key}`;
+
+    try {
+      const response = await fetch(url);
+      const alphaVantageData = await response.json();
+      if (alphaVantageData["Monthly Time Series"] == undefined) {
+        var now = new Date();
+        var secondsRemaining = 60 - now.getSeconds() + 2;
+        console.log(`waiting for ${secondsRemaining}s`);
+        await commonUtil().sleep(secondsRemaining * 1000);
+      } else {
         let newPriceData = reduceTheAmountOfMonthlyPricesData(
           alphaVantageData["Monthly Time Series"]
         );
-        data["monthlyTime"] = newPriceData;
-        fs.writeFile(symbolPath, JSON.stringify(data), (err) => {
-          if (err) throw err;
-        });
-      } catch (error) {
-        console.error(error);
+        newSymbolPriceList[`${outdatedSymbolsCopy[0]}`] = newPriceData;
+        outdatedSymbolsCopy.shift();
       }
+    } catch (error) {
+      console.error(error);
+    }
+    console.log(newSymbolPriceList);
+  }
+}
+function saveUpdatedPriceToStorage() {
+  console.log("here is the fucking problem", outdatedSymbols.length);
+  for (let x = 0; x < outdatedSymbols.length; x++) {
+    let symbolPath = `./src/storage/symbols/${outdatedSymbols[x]}.json`;
+    const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
+    data["lastUpdated"] = Date.now();
+    data["monthlyTime"] = newSymbolPriceList[`${outdatedSymbols[x]}`];
+
+    try {
+      fs.writeFileSync(symbolPath, JSON.stringify(data));
+    } catch (e) {
+      console.log(e);
     }
   }
 }

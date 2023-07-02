@@ -66,12 +66,16 @@
         </yt-formatted-string>
       </yt-chip-cloud-chip-renderer>
     </iron-selector>
+    <div class="progressBar-style">
+      <ProgressBar></ProgressBar>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { useTradingMode } from "@/stores/TradingMode";
 import { watch } from "vue";
+import ProgressBar from "./ProgressBar.vue";
 const tradingModeStore = useTradingMode();
 
 function handleClick(optionNumber) {
@@ -101,6 +105,8 @@ function handleClick(optionNumber) {
   position: relative;
   white-space: nowrap;
   overflow: hidden;
+  display: flex;
+  justify-content: space-between;
 }
 #chips.ytd-feed-filter-chip-bar-renderer {
   transition-duration: 0.15s;
@@ -161,5 +167,10 @@ yt-chip-cloud-chip-renderer {
   flex-direction: row;
   align-items: center;
   display: inline-flex;
+}
+
+.progressBar-style {
+  display: flex;
+  align-items: center;
 }
 </style>
