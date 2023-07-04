@@ -34,7 +34,6 @@ defineExpose({
 
 onMounted(() => {
   ReadStockDataFromStorage();
-  console.log(tradingModeStore.allStockMonthlyData);
 });
 
 function ReadStockDataFromStorage() {

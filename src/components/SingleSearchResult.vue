@@ -96,7 +96,7 @@ async function addSymbol() {
         if (err) throw err;
         console.log(`${filePath} created`);
       });
-      tradingModeStore.allStockMonthlyData.unshift(toWriteToFile);
+      tradingModeStore.allStockMonthlyData.push(toWriteToFile);
     }
   } catch (err) {
     console.log(err);
