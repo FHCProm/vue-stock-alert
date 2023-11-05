@@ -6,7 +6,7 @@
       min-width: 900px;
       padding: 10px 16px;
     "
-    :class="{ rainbow: canTrade }"
+    :class="{ rainbow: canTrade, grayedOut: !dataFreshnessStatus }"
   >
     <div class="row svelte-o95zkd" style="">
       <div class="df aic svelte-o95zkd">
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { defineProps, ref } from "vue";
+import { computed, defineProps, onMounted, ref } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
 const tradingModeStore = useTradingMode();
 
@@ -81,7 +81,9 @@ const props = defineProps({
     required: true,
   },
 });
+
 let canTrade = ref(false);
+
 let currentMonthStatus = ref({
   candleColor: "gray",
   percentage: "?",
@@ -99,6 +101,14 @@ let last3MonthStatus = ref({
 let last6MonthStatus = ref({
   candleColor: "gray",
   percentage: "?",
+});
+
+const dataFreshnessStatus = computed(() => {
+  let dataIsUpdated = false;
+  if (tradingModeStore.dataIsFullyLoaded === true) {
+    dataIsUpdated = true;
+  }
+  return dataIsUpdated;
 });
 
 if (props.symbolData != undefined) {
@@ -465,5 +475,10 @@ body img {
     violet
   );
   border-image-slice: 1;
+}
+
+.grayedOut {
+  border-color: gray;
+  border-image: none;
 }
 </style>
