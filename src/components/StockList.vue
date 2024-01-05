@@ -21,13 +21,6 @@ const directoryPath = "./src/storage/symbols";
 //let allStockMonthlyData = ref([]);
 const tradingModeStore = useTradingMode();
 
-watch(
-  () => tradingModeStore.mode,
-  async (newMode) => {
-    resetAllStockRecord();
-  }
-);
-
 defineExpose({
   ReadStockDataFromStorage,
 });
@@ -57,11 +50,6 @@ function ReadStockDataFromStorage() {
 }
 
 const stockRecordReference = ref(null);
-function resetAllStockRecord() {
-  for (let i = 0; i < stockRecordReference.value.length; i++) {
-    stockRecordReference.value[i].initiateColorChange();
-  }
-}
 </script>
 
 <style scoped>

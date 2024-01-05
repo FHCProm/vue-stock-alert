@@ -82,8 +82,6 @@ const props = defineProps({
   },
 });
 
-let canTrade = ref(false);
-
 let currentMonthStatus = ref({
   candleColor: "gray",
   percentage: "?",
@@ -335,14 +333,14 @@ function getPercentageChanged(open, close) {
   return ((close - open) / open) * 100;
 }
 
-function initiateColorChange() {
-  canTrade.value = false;
+const rainbowBoxChanges = computed(() => {
+  let colored = false;
   if (tradingModeStore.mode == "Standard") {
     if (
       last6MonthStatus.value.candleColor == "green" &&
       lastMonthStatus.value.candleColor == "red"
     ) {
-      canTrade.value = true;
+      colored = true;
     }
   }
 
@@ -351,7 +349,7 @@ function initiateColorChange() {
       last3MonthStatus.value.candleColor == "green" &&
       lastMonthStatus.value.candleColor == "red"
     ) {
-      canTrade.value = true;
+      colored = true;
     }
   }
   if (tradingModeStore.mode == "Most Secure") {
@@ -359,15 +357,13 @@ function initiateColorChange() {
       last6MonthStatus.value.candleColor == "green" &&
       last3MonthStatus.value.candleColor == "red"
     ) {
-      canTrade.value = true;
+      colored = true;
     }
   }
-}
-defineExpose({
-  initiateColorChange,
-});
 
-initiateColorChange();
+  return colored;
+});
+let canTrade = rainbowBoxChanges;
 </script>
 
 <style scoped>
@@ -478,7 +474,7 @@ body img {
 }
 
 .grayedOut {
-  border-color: gray;
+  border: 2px solid gray;
   border-image: none;
 }
 </style>

@@ -151,7 +151,9 @@ async function validateSymbolAvailability(userInput) {
   const api_link = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${userInput.value}&apikey=${api_key}`;
   const response = await fetch(api_link);
   const options = await response.json();
-
+  if (options.Information) {
+    console.log("u have reached ur api limit");
+  }
   return options.bestMatches;
 }
 </script>
