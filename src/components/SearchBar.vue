@@ -129,11 +129,13 @@
 <script setup>
 import SearchResultList from "./SearchResultList.vue";
 import { ref } from "vue";
-import fileSystemRead from "@/utility-functions/fs-read";
+import apiCredential from "@/storage/dataStatus.json";
+import { useTradingMode } from "@/stores/TradingMode";
 
 const searchQuery = ref("");
 const searchResult = ref([]);
 const searchResultVisibility = ref("none");
+const tradingModeStore = useTradingMode();
 
 async function handleSearch() {
   searchResultVisibility.value = "unset";
@@ -146,13 +148,15 @@ function changeSearchResultVisibility() {
 }
 
 async function validateSymbolAvailability(userInput) {
-  const api_key = fileSystemRead().readFromDataStatus();
+  const api_keys = apiCredential["api_key"];
 
-  const api_link = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${userInput.value}&apikey=${api_key}`;
+  const api_link = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${
+    userInput.value
+  }&apikey=${api_keys[tradingModeStore.currentApiKeyIndex]}`;
   const response = await fetch(api_link);
   const options = await response.json();
   if (options.Information) {
-    console.log("u have reached ur api limit");
+    console.log("25 daily api limit based on ip address reached");
   }
   return options.bestMatches;
 }

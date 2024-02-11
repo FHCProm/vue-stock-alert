@@ -3,7 +3,7 @@
     <SingleStockRecord
       ref="stockRecordReference"
       v-for="item in tradingModeStore.allStockMonthlyData"
-      :key="item.filename"
+      :key="item.symbol"
       :symbol-data="item"
     ></SingleStockRecord>
   </div>

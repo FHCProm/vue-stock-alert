@@ -12,6 +12,7 @@ import fileSystemRead from "@/utility-functions/fs-read";
 import commonUtil from "./utility-functions/common-utility";
 import { onMounted, ref } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
+import apiCredential from "@/storage/dataStatus.json";
 
 const fs = window.require("fs");
 const moment = require("moment");
@@ -82,22 +83,22 @@ async function getSymbolsWithOutdatedPrice() {
 }
 
 async function getSymbolPriceFromAlphaVantage() {
-  const api_key = fileSystemRead().readFromDataStatus();
+  const api_key = apiCredential["api_key"];
+
   let outdatedSymbolsCopy = [...outdatedSymbols];
   tradingModeStore.progressBarTotalSymbol = outdatedSymbolsCopy.length;
-
   while (outdatedSymbolsCopy.length > 0) {
     var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${outdatedSymbolsCopy[0]}&apikey=${api_key}`;
 
     try {
       const response = await fetch(url);
       const alphaVantageData = await response.json();
-      if (alphaVantageData["Monthly Time Series"] == undefined) {
-        var now = new Date();
-        var secondsRemaining = 60 - now.getSeconds() + 2;
-        console.log(`waiting for ${secondsRemaining}s`);
-        await commonUtil().sleep(secondsRemaining * 1000);
-      } else {
+
+      if (alphaVantageData["Information"]) {
+        console.log("25 daily api limit based on IP address reached");
+        return;
+      }
+      if (alphaVantageData["Monthly Time Series"]) {
         let newPriceData = reduceTheAmountOfMonthlyPricesData(
           alphaVantageData["Monthly Time Series"]
         );

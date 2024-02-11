@@ -73,6 +73,7 @@
 <script setup>
 import { computed, defineProps, onMounted, ref } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
+import moment from "moment";
 const tradingModeStore = useTradingMode();
 
 const props = defineProps({
@@ -103,13 +104,19 @@ let last6MonthStatus = ref({
 
 const dataFreshnessStatus = computed(() => {
   let dataIsUpdated = false;
-  if (tradingModeStore.dataIsFullyLoaded === true) {
+
+  if (moment(props.symbolData.lastUpdated).isSame(moment(), "month")) {
     dataIsUpdated = true;
   }
+
   return dataIsUpdated;
 });
 
-if (props.symbolData != undefined) {
+if (
+  props.symbolData != undefined &&
+  props.symbolData.monthlyTime != undefined &&
+  dataFreshnessStatus.value == true
+) {
   let specificDate;
   let specificDateMonth;
   let specificDateYear;

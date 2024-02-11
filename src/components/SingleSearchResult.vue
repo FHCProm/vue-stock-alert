@@ -67,7 +67,7 @@ const props = defineProps({
 const highlighted = ref(false);
 const tradingModeStore = useTradingMode();
 
-const api_key = apiCredential["api_key"];
+const api_keys = apiCredential["api_key"];
 
 async function addSymbol() {
   const fs = window.require("fs");
@@ -118,7 +118,9 @@ function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
 function getDataFromAlphaVantage() {
   var request = window.require("request");
 
-  var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbol}&apikey=${api_key}`;
+  var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${
+    props.symbol
+  }&apikey=${api_keys[tradingModeStore.currentApiKeyIndex]}`;
 
   return fetch(url, {
     headers: {
