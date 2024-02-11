@@ -2,7 +2,7 @@
   <div class="wallet mt20 br12 svelte-o95zkd">
     <SingleStockRecord
       ref="stockRecordReference"
-      v-for="item in tradingModeStore.allStockMonthlyData"
+      v-for="item in tradingModeStore.symbols"
       :key="item.symbol"
       :symbol-data="item"
     ></SingleStockRecord>
@@ -10,9 +10,10 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, computed } from "vue";
 import SingleStockRecord from "./SingleStockRecord.vue";
 import { useTradingMode } from "@/stores/TradingMode";
+import fileSystemRead from "@/utility-functions/fs-read";
 
 const fs = window.require("fs");
 const path = window.require("path");
@@ -21,13 +22,29 @@ const directoryPath = "./src/storage/symbols";
 //let allStockMonthlyData = ref([]);
 const tradingModeStore = useTradingMode();
 
-defineExpose({
-  ReadStockDataFromStorage,
+// defineExpose({
+//   ReadStockDataFromStorage,
+// });
+
+let symbols = ref([]);
+onMounted(async () => {
+  // ReadStockDataFromStorage();
+  await getAllSymbolsFromStorage();
 });
 
-onMounted(() => {
-  ReadStockDataFromStorage();
-});
+async function getAllSymbolsFromStorage() {
+  let directoryPath = "./src/storage/symbols";
+  let allSymbols = [];
+  allSymbols = await fileSystemRead().readDir(directoryPath);
+  for (let x = 0; x < allSymbols.length; x++) {
+    let symbolPath = `./src/storage/symbols/${allSymbols[x]}`;
+    const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
+
+    symbols.value.push(data);
+  }
+
+  tradingModeStore.symbols = symbols.value;
+}
 
 function ReadStockDataFromStorage() {
   tradingModeStore.allStockMonthlyData = [];

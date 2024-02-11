@@ -74,6 +74,7 @@
 import { computed, defineProps, onMounted, ref } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
 import moment from "moment";
+import apiCredential from "@/storage/dataStatus.json";
 const tradingModeStore = useTradingMode();
 
 const props = defineProps({
@@ -82,6 +83,7 @@ const props = defineProps({
     required: true,
   },
 });
+const fs = window.require("fs");
 
 let currentMonthStatus = ref({
   candleColor: "gray",
@@ -112,9 +114,38 @@ const dataFreshnessStatus = computed(() => {
   return dataIsUpdated;
 });
 
+let symbolMonthlyPrice = {};
+onMounted(async () => {
+  symbolMonthlyPrice = props.symbolData.monthlyTime;
+  if (dataFreshnessStatus.value == false) {
+    console.log("do your data pulling here and then save to database");
+    const api_key = apiCredential["api_key"];
+    var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbolData["symbol"]}&apikey=${api_key}`;
+    try {
+      const response = await fetch(url);
+      const alphaVantageData = await response.json();
+
+      if (alphaVantageData["Information"]) {
+        console.log("25 daily api limit based on IP address reached");
+        return;
+      }
+      if (alphaVantageData["Monthly Time Series"]) {
+        let newPriceData = reduceTheAmountOfMonthlyPricesData(
+          alphaVantageData["Monthly Time Series"]
+        );
+        symbolMonthlyPrice = newPriceData;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    //make your updating to database easier by adding a function that can keep saving stock data in trading mode file
+    savePriceToStorage();
+  }
+});
+
 if (
   props.symbolData != undefined &&
-  props.symbolData.monthlyTime != undefined &&
+  Object.values(symbolMonthlyPrice).includes(true) &&
   dataFreshnessStatus.value == true
 ) {
   let specificDate;
@@ -200,7 +231,8 @@ if (
 
     if (specificDateMonth == lastMonth && specificDateYear == yearOfLastMonth) {
       lastMonthOpenAndClosePrice = {
-        ...props.symbolData.monthlyTime[`${key}`],
+        ...symbolMonthlyPrice[`${key}`],
+        // ...props.symbolData.monthlyTime[`${key}`],
       };
     }
 
@@ -210,7 +242,7 @@ if (
       specificDateYear == yearOflast3Months
     ) {
       last3MonthOpenAndClosePrice["open"] = {
-        ...props.symbolData.monthlyTime[`${key}`],
+        ...symbolMonthlyPrice[`${key}`],
       };
     }
 
@@ -219,7 +251,7 @@ if (
       specificDateYear == yearOflast3Months
     ) {
       last3MonthOpenAndClosePrice["close"] = {
-        ...props.symbolData.monthlyTime[`${key}`],
+        ...symbolMonthlyPrice[`${key}`],
       };
     }
 
@@ -229,7 +261,7 @@ if (
       specificDateYear == yearOflast6Months
     ) {
       last6MonthOpenAndClosePrice["open"] = {
-        ...props.symbolData.monthlyTime[`${key}`],
+        ...symbolMonthlyPrice[`${key}`],
       };
     }
     if (
@@ -237,7 +269,7 @@ if (
       specificDateYear == yearOflast6Months
     ) {
       last6MonthOpenAndClosePrice["close"] = {
-        ...props.symbolData.monthlyTime[`${key}`],
+        ...symbolMonthlyPrice[`${key}`],
       };
     }
   }
@@ -371,6 +403,32 @@ const rainbowBoxChanges = computed(() => {
   return colored;
 });
 let canTrade = rainbowBoxChanges;
+
+function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
+  let currentDate = new Date();
+  let filteredStockMonthlyPrices = {};
+  for (const key in originalMonthlyPrices) {
+    let specificDate = new Date(key);
+    if (currentDate.getTime() - specificDate.getTime() < 63114704000) {
+      filteredStockMonthlyPrices[`${key}`] = originalMonthlyPrices[`${key}`];
+    }
+  }
+  return filteredStockMonthlyPrices;
+}
+
+function savePriceToStorage() {
+  let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
+  const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
+  data["lastUpdated"] = Date.now();
+  data["monthlyTime"] = symbolMonthlyPrice;
+
+  try {
+    fs.writeFileSync(symbolPath, JSON.stringify(data));
+  } catch (e) {
+    console.log(e);
+    console.log("failed to save to the files");
+  }
+}
 </script>
 
 <style scoped>

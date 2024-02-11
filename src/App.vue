@@ -23,14 +23,18 @@ const tradingModeStore = useTradingMode();
 const stockListReference = ref(null);
 
 onMounted(async () => {
-  if (checkDataStatusJson() == "outdated") {
-    tradingModeStore.dataIsFullyLoaded = false;
-    await getSymbolsWithOutdatedPrice();
-    await getSymbolPriceFromAlphaVantage();
-    saveUpdatedPriceToStorage();
-    stockListReference.value.ReadStockDataFromStorage();
-    tradingModeStore.dataIsFullyLoaded = true;
-  }
+  //new update : no need to check for dataStatus but pull data from database to trading mode
+  // so reading data from api need to let singleStockRecord handle
+  // the logic for progress bar also need to redo since we are no longer depending on the data pull from api
+  //instead we are depending on the singleStockRecord to update to the trading Mode
+  // if (checkDataStatusJson() == "outdated") {
+  //   tradingModeStore.dataIsFullyLoaded = false;
+  //   await getSymbolsWithOutdatedPrice();
+  //   await getSymbolPriceFromAlphaVantage();
+  //   saveUpdatedPriceToStorage();
+  //   // stockListReference.value.ReadStockDataFromStorage();
+  //   tradingModeStore.dataIsFullyLoaded = true;
+  // }
 });
 
 function checkDataStatusJson() {
