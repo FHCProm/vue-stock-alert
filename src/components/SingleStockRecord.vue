@@ -22,29 +22,29 @@
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
-          :style="{ borderColor: currentMonthStatus.candleColor }"
-          >now({{ currentMonthStatus.percentage }}%)</span
+          :style="{ borderColor: computedCurrentMonth.candleColor }"
+          >now({{ computedCurrentMonth.percentage }}%)</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
-          :style="{ borderColor: lastMonthStatus.candleColor }"
-          >1 month({{ lastMonthStatus.percentage }}%)</span
+          :style="{ borderColor: computedLastMonth.candleColor }"
+          >1 month({{ computedLastMonth.percentage }}%)</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
-          :style="{ borderColor: last3MonthStatus.candleColor }"
-          >3 month({{ last3MonthStatus.percentage }}%)</span
+          :style="{ borderColor: computedLast3Month.candleColor }"
+          >3 month({{ computedLast3Month.percentage }}%)</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
-          :style="{ borderColor: last6MonthStatus.candleColor }"
-          >6 month({{ last6MonthStatus.percentage }}%)</span
+          :style="{ borderColor: computedLast6Month.candleColor }"
+          >6 month({{ computedLast6Month.percentage }}%)</span
         >
       </div>
 
@@ -71,7 +71,7 @@
 </template>
 
 <script setup>
-import { computed, defineProps, onMounted, ref } from "vue";
+import { computed, defineProps, onMounted, reactive, ref } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
 import moment from "moment";
 import apiCredential from "@/storage/dataStatus.json";
@@ -104,21 +104,22 @@ let last6MonthStatus = ref({
   percentage: "?",
 });
 
-const dataFreshnessStatus = computed(() => {
-  let dataIsUpdated = false;
-
-  if (moment(props.symbolData.lastUpdated).isSame(moment(), "month")) {
-    dataIsUpdated = true;
-  }
-
-  return dataIsUpdated;
-});
+let monthlyTime = reactive(props.symbolData.monthlyTime);
+const dataFreshnessStatus = ref(false);
 
 let symbolMonthlyPrice = {};
+let dataIsUpdated = ref(false);
 onMounted(async () => {
   symbolMonthlyPrice = props.symbolData.monthlyTime;
-  if (dataFreshnessStatus.value == false) {
-    console.log("do your data pulling here and then save to database");
+
+  if (moment(props.symbolData.lastUpdated).isSame(moment(), "month")) {
+    dataIsUpdated.value = true;
+    dataFreshnessStatus.value = true;
+    console.log(props.symbolData.symbol);
+  }
+
+  if (dataIsUpdated.value == false) {
+    console.log(`getting data for ${props.symbolData.symbol}`);
     const api_key = apiCredential["api_key"];
     var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbolData["symbol"]}&apikey=${api_key}`;
     try {
@@ -135,239 +136,515 @@ onMounted(async () => {
         );
         symbolMonthlyPrice = newPriceData;
       }
+      savePriceToStorage();
+      dataFreshnessStatus.value = true;
     } catch (error) {
       console.error(error);
     }
     //make your updating to database easier by adding a function that can keep saving stock data in trading mode file
-    savePriceToStorage();
   }
 });
 
-if (
-  props.symbolData != undefined &&
-  Object.values(symbolMonthlyPrice).includes(true) &&
-  dataFreshnessStatus.value == true
-) {
-  let specificDate;
-  let specificDateMonth;
-  let specificDateYear;
+const computedCurrentMonth = computed(() => {
+  let currentMonthValues = {};
+  if (dataIsUpdated.value) {
+    let specificDate;
+    let specificDateMonth;
+    let specificDateYear;
+    let currentDate = new Date();
+    let currentMonthOpenAndClosePrice = {};
 
-  let currentDate = new Date();
-  let currentMonthOpenAndClosePrice = {};
-  let lastMonthOpenAndClosePrice = {};
-  let last3MonthOpenAndClosePrice = {};
-  let last6MonthOpenAndClosePrice = {};
+    for (const key in monthlyTime) {
+      specificDate = new Date(key);
+      specificDateMonth = specificDate.getMonth();
+      specificDateYear = specificDate.getFullYear();
 
-  let yearOfLastMonth = currentDate.getFullYear();
-  let lastMonth = currentDate.getMonth() - 1;
-
-  //if current month is january , there will be bug if we dont add this.
-  if (lastMonth < 0) {
-    lastMonth = 11;
-    yearOfLastMonth -= 1;
-  }
-
-  //
-  //
-  //this is to get last 3 months candles.Get the opening month and closing month and year
-  //
-  //
-  let last3MonthOpenMonth;
-  let last3MonthCloseMonth;
-  let yearOflast3Months = yearOfLastMonth;
-  let foundOpenAndClose3Month = false;
-  const closingMonthOf3Months = [2, 5, 8, 11];
-  for (let x = lastMonth; foundOpenAndClose3Month == false; x--) {
-    if (x < 0) {
-      x = 11;
-      yearOflast3Months -= 1;
+      if (
+        specificDateMonth == currentDate.getMonth() &&
+        specificDateYear == currentDate.getFullYear()
+      ) {
+        currentMonthOpenAndClosePrice = {
+          ...monthlyTime[`${key}`],
+        };
+      }
     }
-    if (closingMonthOf3Months.includes(x)) {
-      last3MonthCloseMonth = x;
-      last3MonthOpenMonth = x - 2;
-      foundOpenAndClose3Month = true;
-    }
-  }
-
-  //
-  //
-  //this is to get last 6 months candles.Get the opening month and closing month
-  //
-  //
-  let last6MonthOpenMonth;
-  let last6MonthCloseMonth;
-  let yearOflast6Months = yearOfLastMonth;
-  let foundOpenAndClose6Month = false;
-  const closingMonthOf6Months = [5, 11];
-  for (let x = lastMonth; foundOpenAndClose6Month == false; x--) {
-    if (x < 0) {
-      x = 11;
-      yearOflast6Months -= 1;
-    }
-    if (closingMonthOf6Months.includes(x)) {
-      last6MonthCloseMonth = x;
-      last6MonthOpenMonth = x - 5;
-      foundOpenAndClose6Month = true;
-    }
-  }
-
-  //with all the necessary dates , now we loop through Alpha vantage data to get prices.
-  for (const key in props.symbolData.monthlyTime) {
-    specificDate = new Date(key);
-    specificDateMonth = specificDate.getMonth();
-    specificDateYear = specificDate.getFullYear();
-
-    //this is to get this month open and close price
-    if (
-      specificDateMonth == currentDate.getMonth() &&
-      specificDateYear == currentDate.getFullYear()
-    ) {
-      currentMonthOpenAndClosePrice = {
-        ...props.symbolData.monthlyTime[`${key}`],
-      };
-    }
-
-    //this is to get last month open and close price
-
-    if (specificDateMonth == lastMonth && specificDateYear == yearOfLastMonth) {
-      lastMonthOpenAndClosePrice = {
-        ...symbolMonthlyPrice[`${key}`],
-        // ...props.symbolData.monthlyTime[`${key}`],
-      };
-    }
-
-    //this is to get last 3 month open and close price.
-    if (
-      specificDateMonth == last3MonthOpenMonth &&
-      specificDateYear == yearOflast3Months
-    ) {
-      last3MonthOpenAndClosePrice["open"] = {
-        ...symbolMonthlyPrice[`${key}`],
-      };
-    }
+    let currentMonthPercentageChange = getPercentageChanged(
+      currentMonthOpenAndClosePrice["1. open"],
+      currentMonthOpenAndClosePrice["4. close"]
+    );
 
     if (
-      specificDateMonth == last3MonthCloseMonth &&
-      specificDateYear == yearOflast3Months
+      currentMonthOpenAndClosePrice["4. close"] -
+        currentMonthOpenAndClosePrice["1. open"] >=
+      0
     ) {
-      last3MonthOpenAndClosePrice["close"] = {
-        ...symbolMonthlyPrice[`${key}`],
-      };
+      currentMonthValues["candleColor"] = "green";
+    } else {
+      currentMonthValues["candleColor"] = "red";
+    }
+    currentMonthValues["percentage"] = Math.abs(
+      currentMonthPercentageChange
+    ).toFixed(2);
+  }
+  return currentMonthValues;
+});
+
+const computedLastMonth = computed(() => {
+  let lastMonthValues = {};
+  if (dataIsUpdated.value) {
+    let specificDate;
+    let specificDateMonth;
+    let specificDateYear;
+    let currentDate = new Date();
+    let lastMonthOpenAndClosePrice = {};
+
+    let yearOfLastMonth = currentDate.getFullYear();
+    let lastMonth = currentDate.getMonth() - 1;
+
+    //if current month is january , there will be bug if we dont add this.
+    if (lastMonth < 0) {
+      lastMonth = 11;
+      yearOfLastMonth -= 1;
     }
 
-    //this is to get last 6 month open and close price.
+    //with all the necessary dates , now we loop through Alpha vantage data to get prices.
+    for (const key in monthlyTime) {
+      specificDate = new Date(key);
+      specificDateMonth = specificDate.getMonth();
+      specificDateYear = specificDate.getFullYear();
+
+      if (
+        specificDateMonth == lastMonth &&
+        specificDateYear == yearOfLastMonth
+      ) {
+        lastMonthOpenAndClosePrice = {
+          ...monthlyTime[`${key}`],
+          // ...props.symbolData.monthlyTime[`${key}`],
+        };
+      }
+    }
+
+    let lastMonthPercentageChange = getPercentageChanged(
+      lastMonthOpenAndClosePrice["1. open"],
+      lastMonthOpenAndClosePrice["4. close"]
+    );
+
     if (
-      specificDateMonth == last6MonthOpenMonth &&
-      specificDateYear == yearOflast6Months
+      lastMonthOpenAndClosePrice["4. close"] -
+        lastMonthOpenAndClosePrice["1. open"] >=
+      0
     ) {
-      last6MonthOpenAndClosePrice["open"] = {
-        ...symbolMonthlyPrice[`${key}`],
-      };
+      lastMonthValues["candleColor"] = "green";
+    } else {
+      lastMonthValues["candleColor"] = "red";
     }
+    lastMonthValues["percentage"] = Math.abs(lastMonthPercentageChange).toFixed(
+      2
+    );
+  }
+  return lastMonthValues;
+});
+
+const computedLast3Month = computed(() => {
+  let last3MonthValue = {};
+  if (dataIsUpdated.value) {
+    let specificDate;
+    let specificDateMonth;
+    let specificDateYear;
+
+    let currentDate = new Date();
+    let last3MonthOpenAndClosePrice = {};
+    let yearOfLastMonth = currentDate.getFullYear();
+    let lastMonth = currentDate.getMonth() - 1;
+
+    //if current month is january , there will be bug if we dont add this.
+    if (lastMonth < 0) {
+      lastMonth = 11;
+      yearOfLastMonth -= 1;
+    }
+    //
+    //
+    //this is to get last 3 months candles.Get the opening month and closing month and year
+    //
+    //
+    let last3MonthOpenMonth;
+    let last3MonthCloseMonth;
+    let yearOflast3Months = yearOfLastMonth;
+    let foundOpenAndClose3Month = false;
+    const closingMonthOf3Months = [2, 5, 8, 11];
+    for (let x = lastMonth; foundOpenAndClose3Month == false; x--) {
+      if (x < 0) {
+        x = 11;
+        yearOflast3Months -= 1;
+      }
+      if (closingMonthOf3Months.includes(x)) {
+        last3MonthCloseMonth = x;
+        last3MonthOpenMonth = x - 2;
+        foundOpenAndClose3Month = true;
+      }
+    }
+    for (const key in monthlyTime) {
+      specificDate = new Date(key);
+      specificDateMonth = specificDate.getMonth();
+      specificDateYear = specificDate.getFullYear();
+      //this is to get last 3 month open and close price.
+      if (
+        specificDateMonth == last3MonthOpenMonth &&
+        specificDateYear == yearOflast3Months
+      ) {
+        last3MonthOpenAndClosePrice["open"] = {
+          ...monthlyTime[`${key}`],
+        };
+      }
+
+      if (
+        specificDateMonth == last3MonthCloseMonth &&
+        specificDateYear == yearOflast3Months
+      ) {
+        last3MonthOpenAndClosePrice["close"] = {
+          ...monthlyTime[`${key}`],
+        };
+      }
+    }
+
+    //
+    //
+    //this is for last 3 month status
+    //
+    //
+
+    let last3MonthPercentageChange = getPercentageChanged(
+      last3MonthOpenAndClosePrice.open["1. open"],
+      last3MonthOpenAndClosePrice.close["4. close"]
+    );
     if (
-      specificDateMonth == last6MonthCloseMonth &&
-      specificDateYear == yearOflast6Months
+      last3MonthOpenAndClosePrice.close["4. close"] -
+        last3MonthOpenAndClosePrice.open["1. open"] >=
+      0
     ) {
-      last6MonthOpenAndClosePrice["close"] = {
-        ...symbolMonthlyPrice[`${key}`],
-      };
+      last3MonthValue["candleColor"] = "green";
+    } else {
+      last3MonthValue["candleColor"] = "red";
     }
+    last3MonthValue["percentage"] = Math.abs(
+      last3MonthPercentageChange
+    ).toFixed(2);
   }
+  return last3MonthValue;
+});
 
-  //
-  //
-  //this is for current month status
-  //
-  //
+const computedLast6Month = computed(() => {
+  let last6MonthValue = {};
+  if (dataIsUpdated.value) {
+    let specificDate;
+    let specificDateMonth;
+    let specificDateYear;
 
-  let currentMonthPercentageChange = getPercentageChanged(
-    currentMonthOpenAndClosePrice["1. open"],
-    currentMonthOpenAndClosePrice["4. close"]
-  );
-  if (
-    currentMonthOpenAndClosePrice["4. close"] -
-      currentMonthOpenAndClosePrice["1. open"] >=
-    0
-  ) {
-    currentMonthStatus.value.candleColor = "green";
-  } else {
-    currentMonthStatus.value.candleColor = "red";
+    let currentDate = new Date();
+    let last6MonthOpenAndClosePrice = {};
+
+    let yearOfLastMonth = currentDate.getFullYear();
+    let lastMonth = currentDate.getMonth() - 1;
+
+    //
+    //
+    //this is to get last 6 months candles.Get the opening month and closing month
+    //
+    //
+    let last6MonthOpenMonth;
+    let last6MonthCloseMonth;
+    let yearOflast6Months = yearOfLastMonth;
+    let foundOpenAndClose6Month = false;
+    const closingMonthOf6Months = [5, 11];
+    for (let x = lastMonth; foundOpenAndClose6Month == false; x--) {
+      if (x < 0) {
+        x = 11;
+        yearOflast6Months -= 1;
+      }
+      if (closingMonthOf6Months.includes(x)) {
+        last6MonthCloseMonth = x;
+        last6MonthOpenMonth = x - 5;
+        foundOpenAndClose6Month = true;
+      }
+    }
+
+    //with all the necessary dates , now we loop through Alpha vantage data to get prices.
+
+    for (const key in monthlyTime) {
+      specificDate = new Date(key);
+      specificDateMonth = specificDate.getMonth();
+      specificDateYear = specificDate.getFullYear();
+
+      //this is to get last 6 month open and close price.
+      if (
+        specificDateMonth == last6MonthOpenMonth &&
+        specificDateYear == yearOflast6Months
+      ) {
+        last6MonthOpenAndClosePrice["open"] = {
+          ...monthlyTime[`${key}`],
+        };
+      }
+      if (
+        specificDateMonth == last6MonthCloseMonth &&
+        specificDateYear == yearOflast6Months
+      ) {
+        last6MonthOpenAndClosePrice["close"] = {
+          ...monthlyTime[`${key}`],
+        };
+      }
+    }
+    //
+    //
+    //this is for last 6 month status
+    //
+    //
+
+    let last6MonthPercentageChange = getPercentageChanged(
+      last6MonthOpenAndClosePrice.open["1. open"],
+      last6MonthOpenAndClosePrice.close["4. close"]
+    );
+    if (
+      last6MonthOpenAndClosePrice.close["4. close"] -
+        last6MonthOpenAndClosePrice.open["1. open"] >=
+      0
+    ) {
+      last6MonthValue["candleColor"] = "green";
+    } else {
+      last6MonthValue["candleColor"] = "red";
+    }
+
+    last6MonthValue["percentage"] = Math.abs(
+      last6MonthPercentageChange
+    ).toFixed(2);
   }
-  currentMonthStatus.value.percentage = Math.abs(
-    currentMonthPercentageChange
-  ).toFixed(2);
+  return last6MonthValue;
+});
 
-  //
-  //
-  //this is for last month status
-  //
-  //
+// if (
+//   props.symbolData != undefined &&
+//   Object.values(symbolMonthlyPrice).includes(true) &&
+//   dataFreshnessStatus.value == true
+// ) {
+//   let specificDate;
+//   let specificDateMonth;
+//   let specificDateYear;
 
-  let lastMonthPercentageChange = getPercentageChanged(
-    lastMonthOpenAndClosePrice["1. open"],
-    lastMonthOpenAndClosePrice["4. close"]
-  );
+//   let currentDate = new Date();
+//   let currentMonthOpenAndClosePrice = {};
+//   let lastMonthOpenAndClosePrice = {};
+//   let last3MonthOpenAndClosePrice = {};
+//   let last6MonthOpenAndClosePrice = {};
 
-  if (
-    lastMonthOpenAndClosePrice["4. close"] -
-      lastMonthOpenAndClosePrice["1. open"] >=
-    0
-  ) {
-    lastMonthStatus.value.candleColor = "green";
-  } else {
-    lastMonthStatus.value.candleColor = "red";
-  }
-  lastMonthStatus.value.percentage = Math.abs(
-    lastMonthPercentageChange
-  ).toFixed(2);
+//   let yearOfLastMonth = currentDate.getFullYear();
+//   let lastMonth = currentDate.getMonth() - 1;
 
-  //
-  //
-  //this is for last 3 month status
-  //
-  //
-  let last3MonthPercentageChange = getPercentageChanged(
-    last3MonthOpenAndClosePrice.open["1. open"],
-    last3MonthOpenAndClosePrice.close["4. close"]
-  );
-  if (
-    last3MonthOpenAndClosePrice.close["4. close"] -
-      last3MonthOpenAndClosePrice.open["1. open"] >=
-    0
-  ) {
-    last3MonthStatus.value.candleColor = "green";
-  } else {
-    last3MonthStatus.value.candleColor = "red";
-  }
-  last3MonthStatus.value.percentage = Math.abs(
-    last3MonthPercentageChange
-  ).toFixed(2);
+//   //if current month is january , there will be bug if we dont add this.
+//   if (lastMonth < 0) {
+//     lastMonth = 11;
+//     yearOfLastMonth -= 1;
+//   }
 
-  //
-  //
-  //this is for last 6 month status
-  //
-  //
+//   //
+//   //
+//   //this is to get last 3 months candles.Get the opening month and closing month and year
+//   //
+//   //
+//   let last3MonthOpenMonth;
+//   let last3MonthCloseMonth;
+//   let yearOflast3Months = yearOfLastMonth;
+//   let foundOpenAndClose3Month = false;
+//   const closingMonthOf3Months = [2, 5, 8, 11];
+//   for (let x = lastMonth; foundOpenAndClose3Month == false; x--) {
+//     if (x < 0) {
+//       x = 11;
+//       yearOflast3Months -= 1;
+//     }
+//     if (closingMonthOf3Months.includes(x)) {
+//       last3MonthCloseMonth = x;
+//       last3MonthOpenMonth = x - 2;
+//       foundOpenAndClose3Month = true;
+//     }
+//   }
 
-  let last6MonthPercentageChange = getPercentageChanged(
-    last6MonthOpenAndClosePrice.open["1. open"],
-    last6MonthOpenAndClosePrice.close["4. close"]
-  );
+//   //
+//   //
+//   //this is to get last 6 months candles.Get the opening month and closing month
+//   //
+//   //
+//   let last6MonthOpenMonth;
+//   let last6MonthCloseMonth;
+//   let yearOflast6Months = yearOfLastMonth;
+//   let foundOpenAndClose6Month = false;
+//   const closingMonthOf6Months = [5, 11];
+//   for (let x = lastMonth; foundOpenAndClose6Month == false; x--) {
+//     if (x < 0) {
+//       x = 11;
+//       yearOflast6Months -= 1;
+//     }
+//     if (closingMonthOf6Months.includes(x)) {
+//       last6MonthCloseMonth = x;
+//       last6MonthOpenMonth = x - 5;
+//       foundOpenAndClose6Month = true;
+//     }
+//   }
 
-  if (
-    last6MonthOpenAndClosePrice.close["4. close"] -
-      last6MonthOpenAndClosePrice.open["1. open"] >=
-    0
-  ) {
-    last6MonthStatus.value.candleColor = "green";
-  } else {
-    last6MonthStatus.value.candleColor = "red";
-  }
+//   //with all the necessary dates , now we loop through Alpha vantage data to get prices.
+//   for (const key in props.symbolData.monthlyTime) {
+//     specificDate = new Date(key);
+//     specificDateMonth = specificDate.getMonth();
+//     specificDateYear = specificDate.getFullYear();
 
-  last6MonthStatus.value.percentage = Math.abs(
-    last6MonthPercentageChange
-  ).toFixed(2);
-}
+//     //this is to get this month open and close price
+//     if (
+//       specificDateMonth == currentDate.getMonth() &&
+//       specificDateYear == currentDate.getFullYear()
+//     ) {
+//       currentMonthOpenAndClosePrice = {
+//         ...props.symbolData.monthlyTime[`${key}`],
+//       };
+//     }
+
+//     //this is to get last month open and close price
+
+//     if (specificDateMonth == lastMonth && specificDateYear == yearOfLastMonth) {
+//       lastMonthOpenAndClosePrice = {
+//         ...symbolMonthlyPrice[`${key}`],
+//         // ...props.symbolData.monthlyTime[`${key}`],
+//       };
+//     }
+
+//     //this is to get last 3 month open and close price.
+//     if (
+//       specificDateMonth == last3MonthOpenMonth &&
+//       specificDateYear == yearOflast3Months
+//     ) {
+//       last3MonthOpenAndClosePrice["open"] = {
+//         ...symbolMonthlyPrice[`${key}`],
+//       };
+//     }
+
+//     if (
+//       specificDateMonth == last3MonthCloseMonth &&
+//       specificDateYear == yearOflast3Months
+//     ) {
+//       last3MonthOpenAndClosePrice["close"] = {
+//         ...symbolMonthlyPrice[`${key}`],
+//       };
+//     }
+
+//     //this is to get last 6 month open and close price.
+//     if (
+//       specificDateMonth == last6MonthOpenMonth &&
+//       specificDateYear == yearOflast6Months
+//     ) {
+//       last6MonthOpenAndClosePrice["open"] = {
+//         ...symbolMonthlyPrice[`${key}`],
+//       };
+//     }
+//     if (
+//       specificDateMonth == last6MonthCloseMonth &&
+//       specificDateYear == yearOflast6Months
+//     ) {
+//       last6MonthOpenAndClosePrice["close"] = {
+//         ...symbolMonthlyPrice[`${key}`],
+//       };
+//     }
+//   }
+
+//   //
+//   //
+//   //this is for current month status
+//   //
+//   //
+
+//   let currentMonthPercentageChange = getPercentageChanged(
+//     currentMonthOpenAndClosePrice["1. open"],
+//     currentMonthOpenAndClosePrice["4. close"]
+//   );
+//   if (
+//     currentMonthOpenAndClosePrice["4. close"] -
+//       currentMonthOpenAndClosePrice["1. open"] >=
+//     0
+//   ) {
+//     currentMonthStatus.value.candleColor = "green";
+//   } else {
+//     currentMonthStatus.value.candleColor = "red";
+//   }
+//   currentMonthStatus.value.percentage = Math.abs(
+//     currentMonthPercentageChange
+//   ).toFixed(2);
+
+//   //
+//   //
+//   //this is for last month status
+//   //
+//   //
+
+//   let lastMonthPercentageChange = getPercentageChanged(
+//     lastMonthOpenAndClosePrice["1. open"],
+//     lastMonthOpenAndClosePrice["4. close"]
+//   );
+
+//   if (
+//     lastMonthOpenAndClosePrice["4. close"] -
+//       lastMonthOpenAndClosePrice["1. open"] >=
+//     0
+//   ) {
+//     lastMonthStatus.value.candleColor = "green";
+//   } else {
+//     lastMonthStatus.value.candleColor = "red";
+//   }
+//   lastMonthStatus.value.percentage = Math.abs(
+//     lastMonthPercentageChange
+//   ).toFixed(2);
+
+//   //
+//   //
+//   //this is for last 3 month status
+//   //
+//   //
+//   let last3MonthPercentageChange = getPercentageChanged(
+//     last3MonthOpenAndClosePrice.open["1. open"],
+//     last3MonthOpenAndClosePrice.close["4. close"]
+//   );
+//   if (
+//     last3MonthOpenAndClosePrice.close["4. close"] -
+//       last3MonthOpenAndClosePrice.open["1. open"] >=
+//     0
+//   ) {
+//     last3MonthStatus.value.candleColor = "green";
+//   } else {
+//     last3MonthStatus.value.candleColor = "red";
+//   }
+//   last3MonthStatus.value.percentage = Math.abs(
+//     last3MonthPercentageChange
+//   ).toFixed(2);
+
+//   //
+//   //
+//   //this is for last 6 month status
+//   //
+//   //
+
+//   let last6MonthPercentageChange = getPercentageChanged(
+//     last6MonthOpenAndClosePrice.open["1. open"],
+//     last6MonthOpenAndClosePrice.close["4. close"]
+//   );
+
+//   if (
+//     last6MonthOpenAndClosePrice.close["4. close"] -
+//       last6MonthOpenAndClosePrice.open["1. open"] >=
+//     0
+//   ) {
+//     last6MonthStatus.value.candleColor = "green";
+//   } else {
+//     last6MonthStatus.value.candleColor = "red";
+//   }
+
+//   last6MonthStatus.value.percentage = Math.abs(
+//     last6MonthPercentageChange
+//   ).toFixed(2);
+// }
 function getPercentageChanged(open, close) {
   return ((close - open) / open) * 100;
 }
@@ -376,8 +653,8 @@ const rainbowBoxChanges = computed(() => {
   let colored = false;
   if (tradingModeStore.mode == "Standard") {
     if (
-      last6MonthStatus.value.candleColor == "green" &&
-      lastMonthStatus.value.candleColor == "red"
+      computedLast6Month.value.candleColor == "green" &&
+      computedLastMonth.value.candleColor == "red"
     ) {
       colored = true;
     }
@@ -385,16 +662,16 @@ const rainbowBoxChanges = computed(() => {
 
   if (tradingModeStore.mode == "Fastest") {
     if (
-      last3MonthStatus.value.candleColor == "green" &&
-      lastMonthStatus.value.candleColor == "red"
+      computedLast3Month.value.candleColor == "green" &&
+      computedLastMonth.value.candleColor == "red"
     ) {
       colored = true;
     }
   }
   if (tradingModeStore.mode == "Most Secure") {
     if (
-      last6MonthStatus.value.candleColor == "green" &&
-      last3MonthStatus.value.candleColor == "red"
+      computedLast6Month.value.candleColor == "green" &&
+      computedLast3Month.value.candleColor == "red"
     ) {
       colored = true;
     }
@@ -419,8 +696,10 @@ function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
 function savePriceToStorage() {
   let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
   const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
+
   data["lastUpdated"] = Date.now();
   data["monthlyTime"] = symbolMonthlyPrice;
+  monthlyTime = symbolMonthlyPrice;
 
   try {
     fs.writeFileSync(symbolPath, JSON.stringify(data));
