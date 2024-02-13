@@ -71,7 +71,14 @@
 </template>
 
 <script setup>
-import { computed, defineProps, onMounted, reactive, ref } from "vue";
+import {
+  VueElement,
+  computed,
+  defineProps,
+  onMounted,
+  reactive,
+  ref,
+} from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
 import moment from "moment";
 import apiCredential from "@/storage/dataStatus.json";
@@ -104,46 +111,11 @@ let last6MonthStatus = ref({
   percentage: "?",
 });
 
-let monthlyTime = reactive(props.symbolData.monthlyTime);
+let monthlyTime = ref(props.symbolData.monthlyTime);
 const dataFreshnessStatus = ref(false);
 
 let symbolMonthlyPrice = {};
 let dataIsUpdated = ref(false);
-onMounted(async () => {
-  symbolMonthlyPrice = props.symbolData.monthlyTime;
-
-  if (moment(props.symbolData.lastUpdated).isSame(moment(), "month")) {
-    dataIsUpdated.value = true;
-    dataFreshnessStatus.value = true;
-    console.log(props.symbolData.symbol);
-  }
-
-  if (dataIsUpdated.value == false) {
-    console.log(`getting data for ${props.symbolData.symbol}`);
-    const api_key = apiCredential["api_key"];
-    var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbolData["symbol"]}&apikey=${api_key}`;
-    try {
-      const response = await fetch(url);
-      const alphaVantageData = await response.json();
-
-      if (alphaVantageData["Information"]) {
-        console.log("25 daily api limit based on IP address reached");
-        return;
-      }
-      if (alphaVantageData["Monthly Time Series"]) {
-        let newPriceData = reduceTheAmountOfMonthlyPricesData(
-          alphaVantageData["Monthly Time Series"]
-        );
-        symbolMonthlyPrice = newPriceData;
-      }
-      savePriceToStorage();
-      dataFreshnessStatus.value = true;
-    } catch (error) {
-      console.error(error);
-    }
-    //make your updating to database easier by adding a function that can keep saving stock data in trading mode file
-  }
-});
 
 const computedCurrentMonth = computed(() => {
   let currentMonthValues = {};
@@ -154,7 +126,7 @@ const computedCurrentMonth = computed(() => {
     let currentDate = new Date();
     let currentMonthOpenAndClosePrice = {};
 
-    for (const key in monthlyTime) {
+    for (const key in monthlyTime.value) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -164,7 +136,7 @@ const computedCurrentMonth = computed(() => {
         specificDateYear == currentDate.getFullYear()
       ) {
         currentMonthOpenAndClosePrice = {
-          ...monthlyTime[`${key}`],
+          ...monthlyTime.value[`${key}`],
         };
       }
     }
@@ -208,7 +180,7 @@ const computedLastMonth = computed(() => {
     }
 
     //with all the necessary dates , now we loop through Alpha vantage data to get prices.
-    for (const key in monthlyTime) {
+    for (const key in monthlyTime.value) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -218,7 +190,7 @@ const computedLastMonth = computed(() => {
         specificDateYear == yearOfLastMonth
       ) {
         lastMonthOpenAndClosePrice = {
-          ...monthlyTime[`${key}`],
+          ...monthlyTime.value[`${key}`],
           // ...props.symbolData.monthlyTime[`${key}`],
         };
       }
@@ -283,7 +255,7 @@ const computedLast3Month = computed(() => {
         foundOpenAndClose3Month = true;
       }
     }
-    for (const key in monthlyTime) {
+    for (const key in monthlyTime.value) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -293,7 +265,7 @@ const computedLast3Month = computed(() => {
         specificDateYear == yearOflast3Months
       ) {
         last3MonthOpenAndClosePrice["open"] = {
-          ...monthlyTime[`${key}`],
+          ...monthlyTime.value[`${key}`],
         };
       }
 
@@ -302,7 +274,7 @@ const computedLast3Month = computed(() => {
         specificDateYear == yearOflast3Months
       ) {
         last3MonthOpenAndClosePrice["close"] = {
-          ...monthlyTime[`${key}`],
+          ...monthlyTime.value[`${key}`],
         };
       }
     }
@@ -370,7 +342,7 @@ const computedLast6Month = computed(() => {
 
     //with all the necessary dates , now we loop through Alpha vantage data to get prices.
 
-    for (const key in monthlyTime) {
+    for (const key in monthlyTime.value) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -381,7 +353,7 @@ const computedLast6Month = computed(() => {
         specificDateYear == yearOflast6Months
       ) {
         last6MonthOpenAndClosePrice["open"] = {
-          ...monthlyTime[`${key}`],
+          ...monthlyTime.value[`${key}`],
         };
       }
       if (
@@ -389,7 +361,7 @@ const computedLast6Month = computed(() => {
         specificDateYear == yearOflast6Months
       ) {
         last6MonthOpenAndClosePrice["close"] = {
-          ...monthlyTime[`${key}`],
+          ...monthlyTime.value[`${key}`],
         };
       }
     }
@@ -645,6 +617,54 @@ const computedLast6Month = computed(() => {
 //     last6MonthPercentageChange
 //   ).toFixed(2);
 // }
+
+onMounted(async () => {
+  symbolMonthlyPrice = props.symbolData.monthlyTime;
+
+  if (moment(props.symbolData.lastUpdated).isSame(moment(), "month")) {
+    dataIsUpdated.value = true;
+    dataFreshnessStatus.value = true;
+    console.log(props.symbolData.symbol);
+  }
+
+  if (dataIsUpdated.value == false) {
+    console.log(`getting data for ${props.symbolData.symbol}`);
+    const api_key = apiCredential["api_key"];
+    var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbolData["symbol"]}&apikey=${api_key}`;
+    try {
+      const response = await fetch(url);
+      const alphaVantageData = await response.json();
+
+      if (alphaVantageData["Information"]) {
+        console.log("25 daily api limit based on IP address reached");
+        return;
+      }
+      if (alphaVantageData["Monthly Time Series"]) {
+        let newPriceData = reduceTheAmountOfMonthlyPricesData(
+          alphaVantageData["Monthly Time Series"]
+        );
+        symbolMonthlyPrice = newPriceData;
+      }
+      savePriceToStorage();
+      dataFreshnessStatus.value = true;
+    } catch (error) {
+      console.error(error);
+    }
+    //make your updating to database easier by adding a function that can keep saving stock data in trading mode file
+  }
+
+  // setTimeout(() => {
+  //   // for (let key in monthlyTime.value) {
+  //   //   monthlyTime.value[key] = {};
+  //   // }
+  //   monthlyTime.value = {};
+  //   for (let key in symbolMonthlyPrice) {
+  //     monthlyTime.value[key] = symbolMonthlyPrice[key];
+  //   }
+  //   console.log(monthlyTime.value);
+  // }, 5000);
+});
+
 function getPercentageChanged(open, close) {
   return ((close - open) / open) * 100;
 }
@@ -699,7 +719,10 @@ function savePriceToStorage() {
 
   data["lastUpdated"] = Date.now();
   data["monthlyTime"] = symbolMonthlyPrice;
-  monthlyTime = symbolMonthlyPrice;
+
+  monthlyTime.value = symbolMonthlyPrice;
+
+  dataIsUpdated.value = true;
 
   try {
     fs.writeFileSync(symbolPath, JSON.stringify(data));
