@@ -6,9 +6,13 @@
       min-width: 900px;
       padding: 10px 16px;
     "
-    :class="{ rainbow: canTrade, grayedOut: !dataFreshnessStatus }"
+    :class="{
+      rainbow: canTrade,
+      grayedOut: !dataFreshnessStatus,
+      glow: newlyAdded,
+    }"
   >
-    <div class="row svelte-o95zkd" style="">
+    <div class="row svelte-o95zkd">
       <div class="df aic svelte-o95zkd">
         <div class="svelte-o95zkd">
           <div class="df aic fw3 T1 lh18 svelte-o95zkd">
@@ -113,6 +117,7 @@ let last6MonthStatus = ref({
 
 let monthlyTime = ref(props.symbolData.monthlyTime);
 const dataFreshnessStatus = ref(false);
+const newlyAdded = ref(false);
 
 let symbolMonthlyPrice = {};
 let dataIsUpdated = ref(false);
@@ -225,7 +230,13 @@ const computedLast3Month = computed(() => {
     let specificDateYear;
 
     let currentDate = new Date();
-    let last3MonthOpenAndClosePrice = {};
+    let last3MonthOpenAndClosePrice = {
+      open: {
+        "1. open": 0,
+        "4. close": 0,
+      },
+      close: { "1. open": 0, "4. close": 0 },
+    };
     let yearOfLastMonth = currentDate.getFullYear();
     let lastMonth = currentDate.getMonth() - 1;
 
@@ -313,7 +324,13 @@ const computedLast6Month = computed(() => {
     let specificDateYear;
 
     let currentDate = new Date();
-    let last6MonthOpenAndClosePrice = {};
+    let last6MonthOpenAndClosePrice = {
+      open: {
+        "1. open": 0,
+        "4. close": 0,
+      },
+      close: { "1. open": 0, "4. close": 0 },
+    };
 
     let yearOfLastMonth = currentDate.getFullYear();
     let lastMonth = currentDate.getMonth() - 1;
@@ -371,23 +388,28 @@ const computedLast6Month = computed(() => {
     //
     //
 
-    let last6MonthPercentageChange = getPercentageChanged(
-      last6MonthOpenAndClosePrice.open["1. open"],
-      last6MonthOpenAndClosePrice.close["4. close"]
-    );
     if (
-      last6MonthOpenAndClosePrice.close["4. close"] -
-        last6MonthOpenAndClosePrice.open["1. open"] >=
-      0
+      last6MonthOpenAndClosePrice.open["1. open"] &&
+      last6MonthOpenAndClosePrice.close["4. close"]
     ) {
-      last6MonthValue["candleColor"] = "green";
-    } else {
-      last6MonthValue["candleColor"] = "red";
-    }
+      let last6MonthPercentageChange = getPercentageChanged(
+        last6MonthOpenAndClosePrice.open["1. open"],
+        last6MonthOpenAndClosePrice.close["4. close"]
+      );
+      if (
+        last6MonthOpenAndClosePrice.close["4. close"] -
+          last6MonthOpenAndClosePrice.open["1. open"] >=
+        0
+      ) {
+        last6MonthValue["candleColor"] = "green";
+      } else {
+        last6MonthValue["candleColor"] = "red";
+      }
 
-    last6MonthValue["percentage"] = Math.abs(
-      last6MonthPercentageChange
-    ).toFixed(2);
+      last6MonthValue["percentage"] = Math.abs(
+        last6MonthPercentageChange
+      ).toFixed(2);
+    }
   }
   return last6MonthValue;
 });
@@ -624,7 +646,6 @@ onMounted(async () => {
   if (moment(props.symbolData.lastUpdated).isSame(moment(), "month")) {
     dataIsUpdated.value = true;
     dataFreshnessStatus.value = true;
-    console.log(props.symbolData.symbol);
   }
 
   if (dataIsUpdated.value == false) {
@@ -653,19 +674,16 @@ onMounted(async () => {
     //make your updating to database easier by adding a function that can keep saving stock data in trading mode file
   }
 
-  // setTimeout(() => {
-  //   // for (let key in monthlyTime.value) {
-  //   //   monthlyTime.value[key] = {};
-  //   // }
-  //   monthlyTime.value = {};
-  //   for (let key in symbolMonthlyPrice) {
-  //     monthlyTime.value[key] = symbolMonthlyPrice[key];
-  //   }
-  //   console.log(monthlyTime.value);
-  // }, 5000);
+  newlyAdded.value = true;
+  setTimeout(() => {
+    newlyAdded.value = false;
+  }, 500);
 });
 
 function getPercentageChanged(open, close) {
+  // if (open == undefined || close == undefined) {
+  //   return 0;
+  // }
   return ((close - open) / open) * 100;
 }
 
@@ -843,5 +861,22 @@ body img {
 .grayedOut {
   border: 2px solid gray;
   border-image: none;
+}
+
+.glow {
+  animation: glow 0.5s ease-in-out forwards;
+  background-size: 100% 200%;
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0;
+    background-color: #383d6b;
+  }
+
+  100% {
+    opacity: 1;
+    background-color: #15172a;
+  }
 }
 </style>

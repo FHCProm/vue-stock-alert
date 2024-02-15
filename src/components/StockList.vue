@@ -19,7 +19,7 @@ const fs = window.require("fs");
 const path = window.require("path");
 
 const directoryPath = "./src/storage/symbols";
-//let allStockMonthlyData = ref([]);
+
 const tradingModeStore = useTradingMode();
 
 // defineExpose({
@@ -44,26 +44,6 @@ async function getAllSymbolsFromStorage() {
   }
 
   tradingModeStore.symbols = symbols.value;
-}
-
-function ReadStockDataFromStorage() {
-  tradingModeStore.allStockMonthlyData = [];
-  fs.readdir(directoryPath, function (err, files) {
-    if (err) {
-      return console.log("Unable to scan directory: " + err);
-    }
-
-    files.forEach((file) => {
-      fs.readFile(path.join(directoryPath, file), "utf8", (err, data) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        let singleStock = JSON.parse(data);
-        tradingModeStore.allStockMonthlyData.push(singleStock);
-      });
-    });
-  });
 }
 
 const stockRecordReference = ref(null);
