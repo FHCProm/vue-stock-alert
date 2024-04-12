@@ -3,7 +3,6 @@ import { computed, ref } from "vue";
 
 export const useTradingMode = defineStore("TradingMode", () => {
   const mode = ref("Standard");
-  const dataIsFullyLoaded = ref(true);
 
   const progressBarLoadedSymbol = ref(0);
   const progressBarTotalSymbol = ref(0);
@@ -19,7 +18,6 @@ export const useTradingMode = defineStore("TradingMode", () => {
   return {
     mode,
     setMode,
-    dataIsFullyLoaded,
 
     progressBarLoadedSymbol,
     progressBarTotalSymbol,

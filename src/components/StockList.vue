@@ -39,11 +39,11 @@ async function getAllSymbolsFromStorage() {
   for (let x = 0; x < allSymbols.length; x++) {
     let symbolPath = `./src/storage/symbols/${allSymbols[x]}`;
     const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
-
     symbols.value.push(data);
   }
 
   tradingModeStore.symbols = symbols.value;
+  tradingModeStore.progressBarTotalSymbol = symbols.value.length;
 }
 
 const stockRecordReference = ref(null);

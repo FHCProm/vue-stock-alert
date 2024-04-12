@@ -96,25 +96,6 @@ const props = defineProps({
 });
 const fs = window.require("fs");
 
-let currentMonthStatus = ref({
-  candleColor: "gray",
-  percentage: "?",
-});
-
-let lastMonthStatus = ref({
-  candleColor: "gray",
-  percentage: "?",
-});
-let last3MonthStatus = ref({
-  candleColor: "gray",
-  percentage: "?",
-});
-
-let last6MonthStatus = ref({
-  candleColor: "gray",
-  percentage: "?",
-});
-
 let monthlyTime = ref(props.symbolData.monthlyTime);
 const dataFreshnessStatus = ref(false);
 const newlyAdded = ref(false);
@@ -646,6 +627,7 @@ onMounted(async () => {
   if (moment(props.symbolData.lastUpdated).isSame(moment(), "month")) {
     dataIsUpdated.value = true;
     dataFreshnessStatus.value = true;
+    tradingModeStore.progressBarLoadedSymbol++;
   }
 
   if (dataIsUpdated.value == false) {
@@ -668,6 +650,7 @@ onMounted(async () => {
       }
       savePriceToStorage();
       dataFreshnessStatus.value = true;
+      tradingModeStore.progressBarLoadedSymbol++;
     } catch (error) {
       console.error(error);
     }

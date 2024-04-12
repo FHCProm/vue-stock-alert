@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!tradingModeStore.dataIsFullyLoaded" class="loader-wrapper">
+  <div v-if="!dataIsFullyLoaded" class="loader-wrapper">
     <div class="loader-words">
       loading...{{ tradingModeStore.progressBarLoadedSymbol }}/{{
         tradingModeStore.progressBarTotalSymbol
@@ -29,9 +29,20 @@
 
 <script setup>
 import { useTradingMode } from "@/stores/TradingMode";
-import { ref } from "vue";
+import { computed } from "vue";
 
 const tradingModeStore = useTradingMode();
+
+const dataIsFullyLoaded = computed(() => {
+  let status = false;
+  if (
+    tradingModeStore.progressBarLoadedSymbol ==
+    tradingModeStore.progressBarTotalSymbol
+  ) {
+    status = true;
+  }
+  return status;
+});
 </script>
 
 <style scoped>
