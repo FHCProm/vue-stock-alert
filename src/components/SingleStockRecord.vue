@@ -92,7 +92,7 @@ import {
 } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
 import moment from "moment";
-import apiCredential from "@/storage/dataStatus.json";
+
 const tradingModeStore = useTradingMode();
 
 const props = defineProps({
@@ -412,7 +412,7 @@ onMounted(async () => {
 
   if (dataIsUpdated.value == false) {
     console.log(`getting data for ${props.symbolData.symbol}`);
-    const api_key = apiCredential["api_key"];
+    const api_key = process.env.API_KEY;
     var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbolData["symbol"]}&apikey=${api_key}`;
     try {
       const response = await fetch(url);

@@ -46,7 +46,6 @@
 <script setup>
 import { defineProps, ref } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
-import apiCredential from "@/storage/dataStatus.json";
 
 const props = defineProps({
   symbol: {
@@ -67,7 +66,7 @@ const props = defineProps({
 const highlighted = ref(false);
 const tradingModeStore = useTradingMode();
 
-const api_keys = apiCredential["api_key"];
+const api_key = process.env.API_KEY;
 
 async function addSymbol() {
   const fs = window.require("fs");
@@ -118,9 +117,7 @@ function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
 function getDataFromAlphaVantage() {
   var request = window.require("request");
 
-  var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${
-    props.symbol
-  }&apikey=${api_keys[tradingModeStore.currentApiKeyIndex]}`;
+  var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbol}&apikey=${api_key}`;
 
   return fetch(url, {
     headers: {
