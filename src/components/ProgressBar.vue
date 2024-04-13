@@ -36,7 +36,7 @@ const tradingModeStore = useTradingMode();
 const dataIsFullyLoaded = computed(() => {
   let status = false;
   if (
-    tradingModeStore.progressBarLoadedSymbol ==
+    tradingModeStore.progressBarLoadedSymbol >=
     tradingModeStore.progressBarTotalSymbol
   ) {
     status = true;

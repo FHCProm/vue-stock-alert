@@ -10,6 +10,7 @@
       rainbow: canTrade,
       grayedOut: !dataFreshnessStatus,
       glow: newlyAdded,
+      boxStarred: isStarred,
     }"
   >
     <div class="row svelte-o95zkd">
@@ -59,6 +60,8 @@
             viewBox="0 0 24 24"
             fill="currentColor"
             class="star"
+            @click="starRecord"
+            :class="{ isStarred: isStarred }"
           >
             <path
               fill-rule="evenodd"
@@ -68,7 +71,11 @@
           </svg>
         </a>
 
-        <a class="ml24 cp BLUE btc-deposit svelte-o95zkd" href="#">Remove</a>
+        <a
+          class="ml24 cp BLUE btc-deposit svelte-o95zkd red-highlight"
+          @click="removeSymbol"
+          >Remove</a
+        >
       </div>
     </div>
   </div>
@@ -395,232 +402,6 @@ const computedLast6Month = computed(() => {
   return last6MonthValue;
 });
 
-// if (
-//   props.symbolData != undefined &&
-//   Object.values(symbolMonthlyPrice).includes(true) &&
-//   dataFreshnessStatus.value == true
-// ) {
-//   let specificDate;
-//   let specificDateMonth;
-//   let specificDateYear;
-
-//   let currentDate = new Date();
-//   let currentMonthOpenAndClosePrice = {};
-//   let lastMonthOpenAndClosePrice = {};
-//   let last3MonthOpenAndClosePrice = {};
-//   let last6MonthOpenAndClosePrice = {};
-
-//   let yearOfLastMonth = currentDate.getFullYear();
-//   let lastMonth = currentDate.getMonth() - 1;
-
-//   //if current month is january , there will be bug if we dont add this.
-//   if (lastMonth < 0) {
-//     lastMonth = 11;
-//     yearOfLastMonth -= 1;
-//   }
-
-//   //
-//   //
-//   //this is to get last 3 months candles.Get the opening month and closing month and year
-//   //
-//   //
-//   let last3MonthOpenMonth;
-//   let last3MonthCloseMonth;
-//   let yearOflast3Months = yearOfLastMonth;
-//   let foundOpenAndClose3Month = false;
-//   const closingMonthOf3Months = [2, 5, 8, 11];
-//   for (let x = lastMonth; foundOpenAndClose3Month == false; x--) {
-//     if (x < 0) {
-//       x = 11;
-//       yearOflast3Months -= 1;
-//     }
-//     if (closingMonthOf3Months.includes(x)) {
-//       last3MonthCloseMonth = x;
-//       last3MonthOpenMonth = x - 2;
-//       foundOpenAndClose3Month = true;
-//     }
-//   }
-
-//   //
-//   //
-//   //this is to get last 6 months candles.Get the opening month and closing month
-//   //
-//   //
-//   let last6MonthOpenMonth;
-//   let last6MonthCloseMonth;
-//   let yearOflast6Months = yearOfLastMonth;
-//   let foundOpenAndClose6Month = false;
-//   const closingMonthOf6Months = [5, 11];
-//   for (let x = lastMonth; foundOpenAndClose6Month == false; x--) {
-//     if (x < 0) {
-//       x = 11;
-//       yearOflast6Months -= 1;
-//     }
-//     if (closingMonthOf6Months.includes(x)) {
-//       last6MonthCloseMonth = x;
-//       last6MonthOpenMonth = x - 5;
-//       foundOpenAndClose6Month = true;
-//     }
-//   }
-
-//   //with all the necessary dates , now we loop through Alpha vantage data to get prices.
-//   for (const key in props.symbolData.monthlyTime) {
-//     specificDate = new Date(key);
-//     specificDateMonth = specificDate.getMonth();
-//     specificDateYear = specificDate.getFullYear();
-
-//     //this is to get this month open and close price
-//     if (
-//       specificDateMonth == currentDate.getMonth() &&
-//       specificDateYear == currentDate.getFullYear()
-//     ) {
-//       currentMonthOpenAndClosePrice = {
-//         ...props.symbolData.monthlyTime[`${key}`],
-//       };
-//     }
-
-//     //this is to get last month open and close price
-
-//     if (specificDateMonth == lastMonth && specificDateYear == yearOfLastMonth) {
-//       lastMonthOpenAndClosePrice = {
-//         ...symbolMonthlyPrice[`${key}`],
-//         // ...props.symbolData.monthlyTime[`${key}`],
-//       };
-//     }
-
-//     //this is to get last 3 month open and close price.
-//     if (
-//       specificDateMonth == last3MonthOpenMonth &&
-//       specificDateYear == yearOflast3Months
-//     ) {
-//       last3MonthOpenAndClosePrice["open"] = {
-//         ...symbolMonthlyPrice[`${key}`],
-//       };
-//     }
-
-//     if (
-//       specificDateMonth == last3MonthCloseMonth &&
-//       specificDateYear == yearOflast3Months
-//     ) {
-//       last3MonthOpenAndClosePrice["close"] = {
-//         ...symbolMonthlyPrice[`${key}`],
-//       };
-//     }
-
-//     //this is to get last 6 month open and close price.
-//     if (
-//       specificDateMonth == last6MonthOpenMonth &&
-//       specificDateYear == yearOflast6Months
-//     ) {
-//       last6MonthOpenAndClosePrice["open"] = {
-//         ...symbolMonthlyPrice[`${key}`],
-//       };
-//     }
-//     if (
-//       specificDateMonth == last6MonthCloseMonth &&
-//       specificDateYear == yearOflast6Months
-//     ) {
-//       last6MonthOpenAndClosePrice["close"] = {
-//         ...symbolMonthlyPrice[`${key}`],
-//       };
-//     }
-//   }
-
-//   //
-//   //
-//   //this is for current month status
-//   //
-//   //
-
-//   let currentMonthPercentageChange = getPercentageChanged(
-//     currentMonthOpenAndClosePrice["1. open"],
-//     currentMonthOpenAndClosePrice["4. close"]
-//   );
-//   if (
-//     currentMonthOpenAndClosePrice["4. close"] -
-//       currentMonthOpenAndClosePrice["1. open"] >=
-//     0
-//   ) {
-//     currentMonthStatus.value.candleColor = "green";
-//   } else {
-//     currentMonthStatus.value.candleColor = "red";
-//   }
-//   currentMonthStatus.value.percentage = Math.abs(
-//     currentMonthPercentageChange
-//   ).toFixed(2);
-
-//   //
-//   //
-//   //this is for last month status
-//   //
-//   //
-
-//   let lastMonthPercentageChange = getPercentageChanged(
-//     lastMonthOpenAndClosePrice["1. open"],
-//     lastMonthOpenAndClosePrice["4. close"]
-//   );
-
-//   if (
-//     lastMonthOpenAndClosePrice["4. close"] -
-//       lastMonthOpenAndClosePrice["1. open"] >=
-//     0
-//   ) {
-//     lastMonthStatus.value.candleColor = "green";
-//   } else {
-//     lastMonthStatus.value.candleColor = "red";
-//   }
-//   lastMonthStatus.value.percentage = Math.abs(
-//     lastMonthPercentageChange
-//   ).toFixed(2);
-
-//   //
-//   //
-//   //this is for last 3 month status
-//   //
-//   //
-//   let last3MonthPercentageChange = getPercentageChanged(
-//     last3MonthOpenAndClosePrice.open["1. open"],
-//     last3MonthOpenAndClosePrice.close["4. close"]
-//   );
-//   if (
-//     last3MonthOpenAndClosePrice.close["4. close"] -
-//       last3MonthOpenAndClosePrice.open["1. open"] >=
-//     0
-//   ) {
-//     last3MonthStatus.value.candleColor = "green";
-//   } else {
-//     last3MonthStatus.value.candleColor = "red";
-//   }
-//   last3MonthStatus.value.percentage = Math.abs(
-//     last3MonthPercentageChange
-//   ).toFixed(2);
-
-//   //
-//   //
-//   //this is for last 6 month status
-//   //
-//   //
-
-//   let last6MonthPercentageChange = getPercentageChanged(
-//     last6MonthOpenAndClosePrice.open["1. open"],
-//     last6MonthOpenAndClosePrice.close["4. close"]
-//   );
-
-//   if (
-//     last6MonthOpenAndClosePrice.close["4. close"] -
-//       last6MonthOpenAndClosePrice.open["1. open"] >=
-//     0
-//   ) {
-//     last6MonthStatus.value.candleColor = "green";
-//   } else {
-//     last6MonthStatus.value.candleColor = "red";
-//   }
-
-//   last6MonthStatus.value.percentage = Math.abs(
-//     last6MonthPercentageChange
-//   ).toFixed(2);
-// }
-
 onMounted(async () => {
   symbolMonthlyPrice = props.symbolData.monthlyTime;
 
@@ -732,6 +513,89 @@ function savePriceToStorage() {
     console.log("failed to save to the files");
   }
 }
+
+function removeSymbol() {
+  let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
+  console.log(tradingModeStore.symbols);
+  fs.unlink(symbolPath, (err) => {
+    if (err) {
+      console.error("An error occurred while deleting the file:", err);
+      return;
+    }
+    //get the index of the removed symbol from tradingModeStore for removal
+    let indexToRemove;
+    for (let x = 0; x < tradingModeStore.symbols.length; x++) {
+      if (tradingModeStore.symbols[x]["symbol"] == props.symbolData.symbol) {
+        indexToRemove = x;
+        break;
+      }
+    }
+    tradingModeStore.symbols.splice(indexToRemove, 1);
+    console.log(`${props.symbolData.symbol} was deleted successfully.`);
+  });
+}
+
+const isStarred = computed(() => {
+  return props.symbolData.isStarred;
+});
+
+function starRecord() {
+  for (let i = 0; i < tradingModeStore.symbols.length; i++) {
+    if (tradingModeStore.symbols[i].symbol == props.symbolData.symbol) {
+      if (tradingModeStore.symbols[i]["isStarred"] == undefined) {
+        tradingModeStore.symbols[i]["isStarred"] = true;
+      } else {
+        tradingModeStore.symbols[i]["isStarred"] =
+          !tradingModeStore.symbols[i]["isStarred"];
+      }
+
+      break;
+    }
+  }
+
+  if (props.symbolData.isStarred) {
+    let indexToBeMoved;
+    for (let i = 0; i < tradingModeStore.symbols.length; i++) {
+      if (props.symbolData.symbol == tradingModeStore.symbols[i].symbol) {
+        indexToBeMoved = i;
+        break;
+      }
+    }
+    let starredItem = tradingModeStore.symbols[indexToBeMoved];
+    tradingModeStore.symbols.splice(indexToBeMoved, 1);
+    tradingModeStore.symbols.unshift(starredItem);
+    //save the star status to the file
+  }
+
+  //remove the star from the line
+  if (!props.symbolData.isStarred) {
+    let movingRow = props.symbolData;
+    let movingRowIndex;
+    //get the location of the to-be-unstarred item to remove it from the array
+    for (let i = 0; i < tradingModeStore.symbols.length; i++) {
+      if (tradingModeStore.symbols[i].symbol == movingRow.symbol) {
+        movingRowIndex = i;
+        break;
+      }
+    }
+    tradingModeStore.symbols.splice(movingRowIndex, 1);
+
+    //get the location where the unstarred item is supposed to be moved
+    let indexToBeMoved;
+    for (let i = 0; i < tradingModeStore.symbols.length; i++) {
+      if (
+        tradingModeStore.symbols[i].isStarred == undefined ||
+        tradingModeStore.symbols[i].isStarred == false
+      ) {
+        indexToBeMoved = i;
+        break;
+      }
+    }
+    tradingModeStore.symbols.splice(indexToBeMoved, 0, movingRow);
+
+    //save the star status to the file
+  }
+}
 </script>
 
 <style scoped>
@@ -824,6 +688,9 @@ body img {
   display: grid;
   justify-content: center;
 }
+.star:hover {
+  color: rgb(244, 235, 187);
+}
 
 .rainbow {
   margin-top: 2px;
@@ -861,5 +728,18 @@ body img {
     opacity: 1;
     background-color: #15172a;
   }
+}
+.red-highlight:hover {
+  color: red;
+}
+.isStarred {
+  color: rgb(255, 200, 0);
+}
+.isStarred:hover {
+  color: rgb(255, 200, 0);
+}
+
+.boxStarred {
+  background-color: #28553156;
 }
 </style>

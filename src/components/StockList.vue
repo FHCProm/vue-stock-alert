@@ -2,8 +2,8 @@
   <div class="wallet mt20 br12 svelte-o95zkd">
     <SingleStockRecord
       ref="stockRecordReference"
-      v-for="item in tradingModeStore.symbols"
-      :key="item.symbol"
+      v-for="(item, index) in tradingModeStore.symbols"
+      :key="index"
       :symbol-data="item"
     ></SingleStockRecord>
   </div>
