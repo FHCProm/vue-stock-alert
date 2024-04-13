@@ -4,7 +4,6 @@ import App from "./App.vue";
 import { createPinia } from "pinia";
 
 if (process.env.NODE_ENV === "development") {
-  console.log("yeah on development now");
   // devtools.connect("http://localhost");
 }
 

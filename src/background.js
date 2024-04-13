@@ -26,6 +26,7 @@ async function createWindow() {
   });
 
   //show developer tool on top so that we can click to open it
+
   const template = [
     {
       label: "Developer Tools",
@@ -34,7 +35,6 @@ async function createWindow() {
       },
     },
   ];
-
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 

@@ -520,7 +520,7 @@ function savePriceToStorage() {
 
 function removeSymbol() {
   let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
-  console.log(tradingModeStore.symbols);
+
   fs.unlink(symbolPath, (err) => {
     if (err) {
       console.error("An error occurred while deleting the file:", err);
