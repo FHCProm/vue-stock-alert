@@ -7,7 +7,7 @@
       padding: 10px 16px;
     "
     :class="{
-      rainbow: canTrade,
+      rainbow: rainbowBoxChanges,
       grayedOut: !dataFreshnessStatus,
       glow: newlyAdded,
       boxStarred: isStarred,
@@ -103,7 +103,6 @@ const props = defineProps({
 });
 const fs = window.require("fs");
 
-let monthlyTime = ref(props.symbolData.monthlyTime);
 const dataFreshnessStatus = ref(false);
 const newlyAdded = ref(false);
 
@@ -119,7 +118,7 @@ const computedCurrentMonth = computed(() => {
     let currentDate = new Date();
     let currentMonthOpenAndClosePrice = {};
 
-    for (const key in monthlyTime.value) {
+    for (const key in props.symbolData.monthlyTime) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -129,7 +128,7 @@ const computedCurrentMonth = computed(() => {
         specificDateYear == currentDate.getFullYear()
       ) {
         currentMonthOpenAndClosePrice = {
-          ...monthlyTime.value[`${key}`],
+          ...props.symbolData.monthlyTime[`${key}`],
         };
       }
     }
@@ -173,7 +172,7 @@ const computedLastMonth = computed(() => {
     }
 
     //with all the necessary dates , now we loop through Alpha vantage data to get prices.
-    for (const key in monthlyTime.value) {
+    for (const key in props.symbolData.monthlyTime) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -183,7 +182,7 @@ const computedLastMonth = computed(() => {
         specificDateYear == yearOfLastMonth
       ) {
         lastMonthOpenAndClosePrice = {
-          ...monthlyTime.value[`${key}`],
+          ...props.symbolData.monthlyTime[`${key}`],
           // ...props.symbolData.monthlyTime[`${key}`],
         };
       }
@@ -254,7 +253,7 @@ const computedLast3Month = computed(() => {
         foundOpenAndClose3Month = true;
       }
     }
-    for (const key in monthlyTime.value) {
+    for (const key in props.symbolData.monthlyTime) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -264,7 +263,7 @@ const computedLast3Month = computed(() => {
         specificDateYear == yearOflast3Months
       ) {
         last3MonthOpenAndClosePrice["open"] = {
-          ...monthlyTime.value[`${key}`],
+          ...props.symbolData.monthlyTime[`${key}`],
         };
       }
 
@@ -273,7 +272,7 @@ const computedLast3Month = computed(() => {
         specificDateYear == yearOflast3Months
       ) {
         last3MonthOpenAndClosePrice["close"] = {
-          ...monthlyTime.value[`${key}`],
+          ...props.symbolData.monthlyTime[`${key}`],
         };
       }
     }
@@ -347,7 +346,7 @@ const computedLast6Month = computed(() => {
 
     //with all the necessary dates , now we loop through Alpha vantage data to get prices.
 
-    for (const key in monthlyTime.value) {
+    for (const key in props.symbolData.monthlyTime) {
       specificDate = new Date(key);
       specificDateMonth = specificDate.getMonth();
       specificDateYear = specificDate.getFullYear();
@@ -358,7 +357,7 @@ const computedLast6Month = computed(() => {
         specificDateYear == yearOflast6Months
       ) {
         last6MonthOpenAndClosePrice["open"] = {
-          ...monthlyTime.value[`${key}`],
+          ...props.symbolData.monthlyTime[`${key}`],
         };
       }
       if (
@@ -366,7 +365,7 @@ const computedLast6Month = computed(() => {
         specificDateYear == yearOflast6Months
       ) {
         last6MonthOpenAndClosePrice["close"] = {
-          ...monthlyTime.value[`${key}`],
+          ...props.symbolData.monthlyTime[`${key}`],
         };
       }
     }
@@ -453,6 +452,7 @@ function getPercentageChanged(open, close) {
 
 const rainbowBoxChanges = computed(() => {
   let colored = false;
+
   if (tradingModeStore.mode == "Standard") {
     if (
       computedLast6Month.value.candleColor == "green" &&
@@ -481,7 +481,6 @@ const rainbowBoxChanges = computed(() => {
 
   return colored;
 });
-let canTrade = rainbowBoxChanges;
 
 function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
   let currentDate = new Date();
@@ -502,7 +501,12 @@ function savePriceToStorage() {
   data["lastUpdated"] = Date.now();
   data["monthlyTime"] = symbolMonthlyPrice;
 
-  monthlyTime.value = symbolMonthlyPrice;
+  for (let x = 0; x < tradingModeStore.symbols.length; x++) {
+    if (tradingModeStore.symbols[x].symbol == props.symbolData.symbol) {
+      tradingModeStore.symbols[x].monthlyTime = symbolMonthlyPrice;
+      break;
+    }
+  }
 
   dataIsUpdated.value = true;
 
@@ -740,6 +744,6 @@ body img {
 }
 
 .boxStarred {
-  background-color: #28553156;
+  background-color: #d9e27534;
 }
 </style>
