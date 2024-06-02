@@ -28,28 +28,28 @@
         <span
           class="uncolored-box"
           :style="{ borderColor: computedCurrentMonth.candleColor }"
-          >now({{ computedCurrentMonth.percentage }}%)</span
+          >{{ computedCurrentMonth.percentage }}%</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
           :style="{ borderColor: computedLastMonth.candleColor }"
-          >1 month({{ computedLastMonth.percentage }}%)</span
+          >{{ computedLastMonth.percentage }}%</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
           :style="{ borderColor: computedLast3Month.candleColor }"
-          >3 month({{ computedLast3Month.percentage }}%)</span
+          >{{ computedLast3Month.percentage }}%</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
           :style="{ borderColor: computedLast6Month.candleColor }"
-          >6 month({{ computedLast6Month.percentage }}%)</span
+          >{{ computedLast6Month.percentage }}%</span
         >
       </div>
 
@@ -682,7 +682,7 @@ body img {
 
 .uncolored-box {
   border: 0.5px solid gray;
-  padding: 4px 8px;
+  padding: 8px 21px;
 }
 
 .star {
