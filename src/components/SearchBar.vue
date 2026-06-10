@@ -91,7 +91,7 @@
       class="DocSearch-Dropdown"
       :style="{ display: searchResultVisibility }"
     >
-      <div class="DocSearch-NoResults" v-if="searchResult.length == 0">
+      <div class="DocSearch-NoResults" v-if="searchResult?.length === 0">
         <div class="DocSearch-Screen-Icon">
           <svg
             width="40"
@@ -156,15 +156,15 @@ async function validateSymbolAvailability(userInput) {
   if (options.Information) {
     console.log("25 daily api limit based on ip address reached");
   }
-  return options.bestMatches;
+  return options.bestMatches || [];
 }
 </script>
 
 <style scoped>
 .DocSearch-Modal {
-  background: #15172a;
+  background: #000;
   border-radius: 6px;
-  box-shadow: inset 1px 1px 0 0 #2c2e40, 0 3px 8px 0 #000309;
+  box-shadow: inset 1px 1px 0 0 #440000, 0 3px 8px 0 rgba(255, 0, 0, 0.25);
   flex-direction: column;
   margin: 20px auto auto;
   padding: 10px 0;
@@ -179,9 +179,9 @@ async function validateSymbolAvailability(userInput) {
 
 .DocSearch-Form {
   align-items: center;
-  background: #000;
+  background: #120000;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 2px #00aeff;
+  box-shadow: inset 0 0 0 2px #ff0000;
   display: flex;
   height: 56px;
   margin: 0;
@@ -192,7 +192,7 @@ async function validateSymbolAvailability(userInput) {
 
 .DocSearch-MagnifierLabel {
   align-items: center;
-  color: #00aeff;
+  color: #ff4d4d;
   display: flex;
   justify-content: center;
 }
@@ -203,9 +203,9 @@ async function validateSymbolAvailability(userInput) {
 
 .DocSearch-Input {
   appearance: none;
-  background: #0000;
+  background: transparent;
   border: 0;
-  color: #f5f6f7;
+  color: white;
   flex: 1;
   font-size: 1.2em;
   height: 100%;
@@ -225,16 +225,17 @@ async function validateSymbolAvailability(userInput) {
 }
 
 .DocSearch-Reset:hover {
-  color: #00aeff;
+  color: #ff4d4d;
 }
 
 .DocSearch-Enter {
-  border: 0.5px solid white;
-
-  color: #f5f6f7;
-  background-color: transparent;
+  border: 0.5px solid #ff0000;
+  color: white;
+  background-color: #ff0000;
   font-size: 15px;
   margin-right: 20px;
+  border-radius: 4px;
+  padding: 6px 12px;
 }
 
 .DocSearch-Dropdown {

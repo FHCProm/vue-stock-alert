@@ -104,7 +104,7 @@ const stockRecordReference = ref(null);
 
 <style scoped>
 .wallet.svelte-o95zkd.svelte-o95zkd {
-  background: #15172a;
+  background: #100000;
 }
 
 .br12 {
@@ -119,6 +119,7 @@ const stockRecordReference = ref(null);
   min-width: 900px;
   padding: 10px 16px;
   border-bottom: 1px solid white;
+  color: white;
 }
 
 .table-header > div {

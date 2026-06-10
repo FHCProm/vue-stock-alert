@@ -28,28 +28,28 @@
         <span
           class="uncolored-box"
           :style="{ borderColor: computedCurrentMonth.candleColor }"
-          >{{ computedCurrentMonth.percentage }}%</span
+          >{{ computedCurrentMonth.percentage ? computedCurrentMonth.percentage + '%' : '' }}</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
           :style="{ borderColor: computedLastMonth.candleColor }"
-          >{{ computedLastMonth.percentage }}%</span
+          >{{ computedLastMonth.percentage ? computedLastMonth.percentage + '%' : '' }}</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
           :style="{ borderColor: computedLast3Month.candleColor }"
-          >{{ computedLast3Month.percentage }}%</span
+          >{{ computedLast3Month.percentage ? computedLast3Month.percentage + '%' : '' }}</span
         >
       </div>
       <div class="svelte-o95zkd">
         <span
           class="uncolored-box"
           :style="{ borderColor: computedLast6Month.candleColor }"
-          >{{ computedLast6Month.percentage }}%</span
+          >{{ computedLast6Month.percentage ? computedLast6Month.percentage + '%' : '' }}</span
         >
       </div>
 
@@ -110,7 +110,7 @@ let symbolMonthlyPrice = {};
 let dataIsUpdated = ref(false);
 
 const computedCurrentMonth = computed(() => {
-  let currentMonthValues = {};
+  let currentMonthValues = { candleColor: "gray", percentage: "" };
   if (dataIsUpdated.value) {
     let specificDate;
     let specificDateMonth;
@@ -154,7 +154,7 @@ const computedCurrentMonth = computed(() => {
 });
 
 const computedLastMonth = computed(() => {
-  let lastMonthValues = {};
+  let lastMonthValues = { candleColor: "gray", percentage: "" };
   if (dataIsUpdated.value) {
     let specificDate;
     let specificDateMonth;
@@ -210,7 +210,7 @@ const computedLastMonth = computed(() => {
 });
 
 const computedLast3Month = computed(() => {
-  let last3MonthValue = {};
+  let last3MonthValue = { candleColor: "gray", percentage: "" };
   if (dataIsUpdated.value) {
     let specificDate;
     let specificDateMonth;
@@ -304,7 +304,7 @@ const computedLast3Month = computed(() => {
 });
 
 const computedLast6Month = computed(() => {
-  let last6MonthValue = {};
+  let last6MonthValue = { candleColor: "gray", percentage: "" };
   if (dataIsUpdated.value) {
     let specificDate;
     let specificDateMonth;
@@ -655,7 +655,7 @@ body img {
 }
 
 .T4 {
-  color: #9fa3ab;
+  color: #dddddd;
 }
 
 .f12 {
@@ -681,69 +681,62 @@ body img {
 }
 
 .uncolored-box {
-  border: 0.5px solid gray;
+  border: 0.5px solid #ff4d4d;
+  color: white;
   padding: 8px 21px;
+  background: rgba(255, 0, 0, 0.08);
 }
 
 .star {
-  color: gray;
+  color: #ffffff;
   width: 20px;
   height: 20px;
   display: grid;
   justify-content: center;
 }
 .star:hover {
-  color: rgb(244, 235, 187);
+  color: #ff4d4d;
 }
 
 .rainbow {
   margin-top: 2px;
-  border: 2px solid;
-  border-image: linear-gradient(
-    to right,
-    red,
-    orange,
-    yellow,
-    green,
-    blue,
-    indigo,
-    violet
-  );
-  border-image-slice: 1;
+  border: 2px solid #ff4d4d;
+  border-image: none;
 }
 
 .grayedOut {
-  border: 2px solid gray;
+  border: 2px solid #666;
   border-image: none;
+  background: #120000;
 }
 
 .glow {
   animation: glow 0.5s ease-in-out forwards;
-  background-size: 100% 200%;
+  background: rgba(255, 0, 0, 0.08);
 }
 
 @keyframes glow {
   0% {
     opacity: 0;
-    background-color: #383d6b;
+    background-color: #2c0000;
   }
 
   100% {
     opacity: 1;
-    background-color: #15172a;
+    background-color: #100000;
   }
 }
 .red-highlight:hover {
-  color: red;
+  color: #ff4d4d;
 }
 .isStarred {
-  color: rgb(255, 200, 0);
+  color: #ff4d4d;
 }
 .isStarred:hover {
-  color: rgb(255, 200, 0);
+  color: #ff4d4d;
 }
 
 .boxStarred {
-  background-color: #d9e27534;
+  background-color: rgba(255, 77, 77, 0.12);
 }
 </style>

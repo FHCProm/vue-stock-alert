@@ -40,17 +40,17 @@ const selectedIndex = ref(0);
 }
 
 .DocSearch-Hit a {
-  background: #090a11;
+  background: #140101;
   border-radius: 4px;
   text-decoration: none;
   display: block;
   padding-left: 12px;
   width: 100%;
-  color: #7f8497;
+  color: white;
 }
 
 .DocSearch-Hit[aria-selected="true"] a {
-  background-color: #00aeff;
+  background-color: #ff0000;
   color: white;
 }
 </style>

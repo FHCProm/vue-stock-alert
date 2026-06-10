@@ -33,14 +33,22 @@ onMounted(async () => {
 
 <style>
 #app {
-  color: white;
+  background: #ffffff;
+  color: #000000;
+  min-height: 100vh;
 }
 
 ::-webkit-search-cancel-button {
   -webkit-appearance: none;
 }
 
+body {
+  background: #ffffff;
+  color: #000000;
+}
+
 body a {
   text-decoration: none;
+  color: #000000;
 }
 </style>

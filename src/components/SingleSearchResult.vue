@@ -3,6 +3,7 @@
     href="#"
     @mouseover="highlighted = true"
     @mouseleave="highlighted = false"
+    @click.prevent="addSymbol"
     @keydown.enter.prevent="addSymbol"
     ><div class="DocSearch-Hit-Container">
       <div class="DocSearch-Hit-icon">
@@ -69,15 +70,22 @@ const tradingModeStore = useTradingMode();
 const api_key = process.env.API_KEY;
 
 async function addSymbol() {
-  const fs = window.require("fs");
-  const path = window.require("path");
-  const folderPath = "./src/storage/symbols";
-  const symbol = `${props.symbol}.json`;
+    let fs = null;
+    let path = null;
+    if (typeof window !== "undefined" && typeof window.require === "function") {
+      try {
+        fs = window.require("fs");
+        path = window.require("path");
+      } catch (requireError) {
+        console.warn("window.require is not available for fs/path", requireError);
+      }
+    }
 
-  const filePath = path.join(folderPath, symbol);
+  const symbol = `${props.symbol}.json`;
+  const filePath = fs ? path.join(folderPath, symbol) : `${folderPath}/${symbol}`;
 
   try {
-    if (fs.existsSync(filePath)) {
+    if (fs && fs.existsSync(filePath)) {
       console.log("symbol has been added");
     } else {
       const stockMonthlyPrice = await getDataFromAlphaVantage();
@@ -91,10 +99,21 @@ async function addSymbol() {
         monthlyTime: filteredData,
         lastUpdated: Date.now(),
       };
-      fs.writeFile(filePath, JSON.stringify(toWriteToFile), function (err) {
-        if (err) throw err;
-        console.log(`${filePath} created`);
-      });
+
+      if (fs) {
+        fs.writeFile(filePath, JSON.stringify(toWriteToFile), function (err) {
+          if (err) throw err;
+          console.log(`${filePath} created`);
+        });
+      } else {
+        try {
+          localStorage.setItem(symbol, JSON.stringify(toWriteToFile));
+          console.log(`${symbol} saved in localStorage`);
+        } catch (storageError) {
+          console.warn("localStorage unavailable", storageError);
+        }
+      }
+
       tradingModeStore.symbols.unshift(toWriteToFile);
     }
   } catch (err) {
@@ -115,26 +134,18 @@ function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
 }
 
 function getDataFromAlphaVantage() {
-  var request = window.require("request");
+  const url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbol}&apikey=${api_key}`;
 
-  var url = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${props.symbol}&apikey=${api_key}`;
-
-  return fetch(url, {
-    headers: {
-      "User-Agent": "request",
-    },
-  })
+  return fetch(url)
     .then((response) => {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       return response.json();
     })
-    .then((data) => {
-      return data;
-    })
     .catch((error) => {
       console.error(`Fetch error: ${error}`);
+      return {};
     });
 }
 </script>
@@ -146,6 +157,9 @@ function getDataFromAlphaVantage() {
   flex-direction: row;
   height: 56px;
   padding: 0 12px 0 0;
+  background: #140101;
+  border-radius: 4px;
+  color: white;
 }
 
 .DocSearch-Hit-icon {
@@ -165,6 +179,12 @@ function getDataFromAlphaVantage() {
   text-overflow: ellipsis;
   white-space: nowrap;
   width: 80%;
+}
+
+.DocSearch-Hit-title,
+.DocSearch-Hit-symbol,
+.DocSearch-Hit-currency {
+  color: white;
 }
 
 .DocSearch-Hit-title {

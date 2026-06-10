@@ -107,6 +107,10 @@ function handleClick(optionNumber) {
   overflow: hidden;
   display: flex;
   justify-content: space-between;
+  background: #120000;
+  border: 1px solid #ff4d4d;
+  border-radius: 12px;
+  padding: 10px 8px;
 }
 #chips.ytd-feed-filter-chip-bar-renderer {
   transition-duration: 0.15s;
@@ -122,8 +126,8 @@ yt-chip-cloud-chip-renderer.ytd-feed-filter-chip-bar-renderer:first-of-type {
 
 yt-chip-cloud-chip-renderer[chip-style="STYLE_DEFAULT"][selected],
 yt-chip-cloud-chip-renderer[chip-style="STYLE_HOME_FILTER"][selected] {
-  background-color: rgba(255, 255, 255, 0.573);
-  color: #0f0f0f;
+  background-color: #ff0000;
+  color: white;
 }
 
 yt-chip-cloud-chip-renderer.ytd-feed-filter-chip-bar-renderer {
@@ -140,8 +144,8 @@ yt-chip-cloud-chip-renderer[chip-style="STYLE_REFRESH_TO_NOVEL_CHIP"] {
 yt-chip-cloud-chip-renderer[chip-style="STYLE_DEFAULT"],
 yt-chip-cloud-chip-renderer[chip-style="STYLE_HOME_FILTER"],
 yt-chip-cloud-chip-renderer[chip-style="STYLE_REFRESH_TO_NOVEL_CHIP"] {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: #f1f1f1;
+  background-color: #2c0000;
+  color: white;
   padding: 0 12px;
   transition: background-color 0.5s cubic-bezier(0.05, 0, 0, 1);
 }
@@ -172,5 +176,8 @@ yt-chip-cloud-chip-renderer {
 .progressBar-style {
   display: flex;
   align-items: center;
+  background: #120000;
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 </style>

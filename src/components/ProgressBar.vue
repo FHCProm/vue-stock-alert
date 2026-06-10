@@ -49,18 +49,22 @@ const dataIsFullyLoaded = computed(() => {
 .loader-wrapper {
   display: flex;
   align-items: center;
+  background: #120000;
+  border: 1px solid #ff4d4d;
+  border-radius: 10px;
+  padding: 8px 10px;
 }
 .loader-words {
   padding-right: 0.5rem;
-  color: aqua;
+  color: white;
 }
 .loader {
-  border: 3px solid #f3f3f3; /* Light grey */
-  border-top: 3px solid aqua; /* Blue */
+  border: 3px solid #333;
+  border-top: 3px solid #ff0000;
   border-radius: 50%;
   width: 15px;
   height: 15px;
-  animation: spin 2s linear infinite;
+  animation: spin 1.2s linear infinite;
 }
 @keyframes spin {
   0% {
@@ -74,6 +78,6 @@ const dataIsFullyLoaded = computed(() => {
 .tick-svg {
   width: 18px;
   height: 18px;
-  color: aqua;
+  color: #ff0000;
 }
 </style>
