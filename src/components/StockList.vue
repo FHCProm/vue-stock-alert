@@ -47,42 +47,11 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, computed, TrackOpTypes } from "vue";
+import { ref } from "vue";
 import SingleStockRecord from "./SingleStockRecord.vue";
 import { useTradingMode } from "@/stores/TradingMode";
-import fileSystemRead from "@/utility-functions/fs-read";
-import coreJs from "core-js";
-
-const fs = window.require("fs");
-const path = window.require("path");
-
-const directoryPath = "./src/storage/symbols";
 
 const tradingModeStore = useTradingMode();
-
-// defineExpose({
-//   ReadStockDataFromStorage,
-// });
-
-let symbols = ref([]);
-onMounted(async () => {
-  // ReadStockDataFromStorage();
-  await getAllSymbolsFromStorage();
-});
-
-async function getAllSymbolsFromStorage() {
-  let directoryPath = "./src/storage/symbols";
-  let allSymbols = [];
-  allSymbols = await fileSystemRead().readDir(directoryPath);
-  for (let x = 0; x < allSymbols.length; x++) {
-    let symbolPath = `./src/storage/symbols/${allSymbols[x]}`;
-    const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
-    symbols.value.push(data);
-  }
-
-  tradingModeStore.symbols = symbols.value;
-  tradingModeStore.progressBarTotalSymbol = symbols.value.length;
-}
 
 let currentlySelected = ref(10);
 function arrangeList(option, event) {

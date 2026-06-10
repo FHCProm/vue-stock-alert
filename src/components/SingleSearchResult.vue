@@ -1,51 +1,29 @@
 <template>
-  <a
-    href="#"
-    @mouseover="highlighted = true"
-    @mouseleave="highlighted = false"
-    @click.prevent="addSymbol"
-    @keydown.enter.prevent="addSymbol"
-    ><div class="DocSearch-Hit-Container">
-      <div class="DocSearch-Hit-icon">
-        <svg width="20" height="20" viewBox="0 0 20 20">
-          <path
-            d="M17 6v12c0 .52-.2 1-1 1H4c-.7 0-1-.33-1-1V2c0-.55.42-1 1-1h8l5 5zM14 8h-3.13c-.51 0-.87-.34-.87-.87V4"
-            stroke="currentColor"
-            fill="none"
-            fill-rule="evenodd"
-            stroke-linejoin="round"
-          ></path>
-        </svg>
-      </div>
-      <div class="DocSearch-Hit-content-wrapper">
-        <span class="DocSearch-Hit-symbol">{{ props.symbol }}</span>
-        <span class="DocSearch-Hit-title">{{ props.name }}</span>
-        <span class="DocSearch-Hit-currency">{{ props.currency }}</span>
-      </div>
-      <div class="DocSearch-Hit-action" v-if="highlighted">
-        <svg
-          class="DocSearch-Hit-Select-Icon"
-          width="20"
-          height="20"
-          viewBox="0 0 20 20"
-        >
-          <g
-            stroke="currentColor"
-            fill="none"
-            fill-rule="evenodd"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M18 3v4c0 2-2 4-4 4H2"></path>
-            <path d="M8 17l-6-6 6-6"></path>
-          </g>
-        </svg>
-      </div></div
-  ></a>
+  <div class="DocSearch-Hit-Container">
+    <div class="DocSearch-Hit-icon">
+      <svg width="20" height="20" viewBox="0 0 20 20">
+        <path
+          d="M17 6v12c0 .52-.2 1-1 1H4c-.7 0-1-.33-1-1V2c0-.55.42-1 1-1h8l5 5zM14 8h-3.13c-.51 0-.87-.34-.87-.87V4"
+          stroke="currentColor"
+          fill="none"
+          fill-rule="evenodd"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </div>
+    <div class="DocSearch-Hit-content-wrapper">
+      <span class="DocSearch-Hit-symbol">{{ props.symbol }}</span>
+      <span class="DocSearch-Hit-title">{{ props.name }}</span>
+      <span class="DocSearch-Hit-currency">{{ props.currency }}</span>
+    </div>
+    <button class="DocSearch-Hit-button" type="button" @click="addSymbol">
+      Select symbol
+    </button>
+  </div>
 </template>
 
 <script setup>
-import { defineProps, ref } from "vue";
+import { defineProps } from "vue";
 import { useTradingMode } from "@/stores/TradingMode";
 
 const props = defineProps({
@@ -60,62 +38,35 @@ const props = defineProps({
   currency: {
     type: String,
   },
-  isHighligeted: {
-    type: Boolean,
-  },
 });
-const highlighted = ref(false);
 const tradingModeStore = useTradingMode();
 
 const api_key = process.env.API_KEY;
 
 async function addSymbol() {
-    let fs = null;
-    let path = null;
-    if (typeof window !== "undefined" && typeof window.require === "function") {
-      try {
-        fs = window.require("fs");
-        path = window.require("path");
-      } catch (requireError) {
-        console.warn("window.require is not available for fs/path", requireError);
-      }
-    }
+  const existing = tradingModeStore.symbols.some(
+    (item) => item.symbol === props.symbol
+  );
 
-  const symbol = `${props.symbol}.json`;
-  const filePath = fs ? path.join(folderPath, symbol) : `${folderPath}/${symbol}`;
+  if (existing) {
+    console.log("symbol has already been added");
+    return;
+  }
 
   try {
-    if (fs && fs.existsSync(filePath)) {
-      console.log("symbol has been added");
-    } else {
-      const stockMonthlyPrice = await getDataFromAlphaVantage();
-      let filteredData = reduceTheAmountOfMonthlyPricesData(
-        stockMonthlyPrice["Monthly Time Series"]
-      );
+    const stockMonthlyPrice = await getDataFromAlphaVantage();
+    const filteredData = reduceTheAmountOfMonthlyPricesData(
+      stockMonthlyPrice["Monthly Time Series"]
+    );
 
-      let toWriteToFile = {
-        company: props.name,
-        symbol: props.symbol,
-        monthlyTime: filteredData,
-        lastUpdated: Date.now(),
-      };
+    const toWriteToFile = {
+      company: props.name,
+      symbol: props.symbol,
+      monthlyTime: filteredData,
+      lastUpdated: Date.now(),
+    };
 
-      if (fs) {
-        fs.writeFile(filePath, JSON.stringify(toWriteToFile), function (err) {
-          if (err) throw err;
-          console.log(`${filePath} created`);
-        });
-      } else {
-        try {
-          localStorage.setItem(symbol, JSON.stringify(toWriteToFile));
-          console.log(`${symbol} saved in localStorage`);
-        } catch (storageError) {
-          console.warn("localStorage unavailable", storageError);
-        }
-      }
-
-      tradingModeStore.symbols.unshift(toWriteToFile);
-    }
+    tradingModeStore.symbols.unshift(toWriteToFile);
   } catch (err) {
     console.log(err);
   }
@@ -178,7 +129,7 @@ function getDataFromAlphaVantage() {
   position: relative;
   text-overflow: ellipsis;
   white-space: nowrap;
-  width: 80%;
+  width: 100%;
 }
 
 .DocSearch-Hit-title,
@@ -191,10 +142,22 @@ function getDataFromAlphaVantage() {
   font-size: 1.2em;
 }
 
-.DocSearch-Hit-action {
-  align-items: center;
-  display: flex;
-  height: 22px;
-  width: 22px;
+.DocSearch-Hit-button {
+  margin-left: auto;
+  padding: 8px 12px;
+  background: #ff0000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.DocSearch-Hit-button:hover,
+.DocSearch-Hit-button:focus {
+  background: #e00000;
+  outline: none;
 }
 </style>
