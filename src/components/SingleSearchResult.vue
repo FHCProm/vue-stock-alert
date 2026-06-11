@@ -108,9 +108,10 @@ function getDataFromAlphaVantage() {
   flex-direction: row;
   height: 56px;
   padding: 0 12px 0 0;
-  background: #140101;
+  background: #ffffff;
   border-radius: 4px;
-  color: white;
+  border: 1px solid #ddd;
+  color: #000;
 }
 
 .DocSearch-Hit-icon {
@@ -135,7 +136,7 @@ function getDataFromAlphaVantage() {
 .DocSearch-Hit-title,
 .DocSearch-Hit-symbol,
 .DocSearch-Hit-currency {
-  color: white;
+  color: #000;
 }
 
 .DocSearch-Hit-title {

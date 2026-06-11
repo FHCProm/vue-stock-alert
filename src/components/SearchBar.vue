@@ -87,6 +87,19 @@
         </button>
       </form>
     </div>
+    <div v-if="searchError" class="DocSearch-ErrorPopup">
+      <div class="DocSearch-ErrorPopup-inner">
+        <strong>API limit reached</strong>
+        <span>{{ searchError }}</span>
+      </div>
+      <button
+        type="button"
+        class="DocSearch-ErrorDismiss"
+        @click="searchError = ''"
+      >
+        Dismiss
+      </button>
+    </div>
     <div
       class="DocSearch-Dropdown"
       :style="{ display: searchResultVisibility }"
@@ -135,9 +148,11 @@ import { useTradingMode } from "@/stores/TradingMode";
 const searchQuery = ref("");
 const searchResult = ref([]);
 const searchResultVisibility = ref("none");
+const searchError = ref("");
 const tradingModeStore = useTradingMode();
 
 async function handleSearch() {
+  searchError.value = "";
   searchResultVisibility.value = "unset";
   searchResult.value = await validateSymbolAvailability(searchQuery);
 }
@@ -145,26 +160,48 @@ async function handleSearch() {
 function changeSearchResultVisibility() {
   searchResult.value = [];
   searchResultVisibility.value = "none";
+  searchError.value = "";
 }
 
 async function validateSymbolAvailability(userInput) {
   const api_key = process.env.API_KEY;
 
   const api_link = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${userInput.value}&apikey=${api_key}`;
-  const response = await fetch(api_link);
-  const options = await response.json();
-  if (options.Information) {
-    console.log("25 daily api limit based on ip address reached");
+
+  try {
+    const response = await fetch(api_link);
+    if (!response.ok) {
+      searchError.value = `Search request failed with status ${response.status}`;
+      return [];
+    }
+
+    const options = await response.json();
+    const apiMessage = options.Information || options.Note || options["Error Message"];
+
+    if (apiMessage) {
+      const isLimitError = apiMessage
+        .toLowerCase()
+        .includes("25 daily api limit");
+      searchError.value = isLimitError
+        ? "AlphaVantage daily API limit reached. Please try again later."
+        : apiMessage;
+      return [];
+    }
+
+    return options.bestMatches || [];
+  } catch (error) {
+    searchError.value =
+      error?.message || "Unable to fetch search results. Please try again.";
+    return [];
   }
-  return options.bestMatches || [];
 }
 </script>
 
 <style scoped>
 .DocSearch-Modal {
-  background: #000;
+  background: #f7f7f7;
   border-radius: 6px;
-  box-shadow: inset 1px 1px 0 0 #440000, 0 3px 8px 0 rgba(255, 0, 0, 0.25);
+  box-shadow: inset 1px 1px 0 0 rgba(255, 0, 0, 0.15), 0 3px 8px 0 rgba(0, 0, 0, 0.08);
   flex-direction: column;
   margin: 20px auto auto;
   padding: 10px 0;
@@ -179,9 +216,9 @@ async function validateSymbolAvailability(userInput) {
 
 .DocSearch-Form {
   align-items: center;
-  background: #120000;
+  background: #ffffff;
   border-radius: 4px;
-  box-shadow: inset 0 0 0 2px #ff0000;
+  box-shadow: inset 0 0 0 1px rgba(255, 0, 0, 0.35);
   display: flex;
   height: 56px;
   margin: 0;
@@ -192,7 +229,7 @@ async function validateSymbolAvailability(userInput) {
 
 .DocSearch-MagnifierLabel {
   align-items: center;
-  color: #ff4d4d;
+  color: #d40000;
   display: flex;
   justify-content: center;
 }
@@ -205,7 +242,7 @@ async function validateSymbolAvailability(userInput) {
   appearance: none;
   background: transparent;
   border: 0;
-  color: white;
+  color: #000;
   flex: 1;
   font-size: 1.2em;
   height: 100%;
@@ -218,14 +255,14 @@ async function validateSymbolAvailability(userInput) {
   animation: 0.1s ease-in forwards f;
   appearance: none;
   background: none;
-  color: white;
+  color: #000;
   padding: 2px;
   border: none;
   right: 0;
 }
 
 .DocSearch-Reset:hover {
-  color: #ff4d4d;
+  color: #d40000;
 }
 
 .DocSearch-Enter {
@@ -252,6 +289,42 @@ async function validateSymbolAvailability(userInput) {
   padding: 36px 0;
   text-align: center;
   width: 80%;
+  color: #000;
+}
+
+.DocSearch-ErrorPopup {
+  align-items: center;
+  background: #ffe5e5;
+  border: 1px solid #ff4d4d;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 12px 0;
+  padding: 12px 14px;
+}
+
+.DocSearch-ErrorPopup-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #000;
+}
+
+.DocSearch-ErrorDismiss {
+  background: transparent;
+  border: 1px solid #ff4d4d;
+  border-radius: 4px;
+  color: #d40000;
+  cursor: pointer;
+  font-size: 0.9em;
+  padding: 6px 10px;
+}
+
+.DocSearch-ErrorDismiss:hover,
+.DocSearch-ErrorDismiss:focus {
+  background: #ff4d4d;
+  color: white;
+  outline: none;
 }
 
 .DocSearch-Screen-Icon {

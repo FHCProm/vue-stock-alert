@@ -101,7 +101,10 @@ const props = defineProps({
     required: true,
   },
 });
-const fs = window.require("fs");
+const fs =
+  typeof window !== "undefined" && typeof window.require === "function"
+    ? window.require("fs")
+    : null;
 
 const dataFreshnessStatus = ref(false);
 const newlyAdded = ref(false);
@@ -495,12 +498,6 @@ function reduceTheAmountOfMonthlyPricesData(originalMonthlyPrices) {
 }
 
 function savePriceToStorage() {
-  let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
-  const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
-
-  data["lastUpdated"] = Date.now();
-  data["monthlyTime"] = symbolMonthlyPrice;
-
   for (let x = 0; x < tradingModeStore.symbols.length; x++) {
     if (tradingModeStore.symbols[x].symbol == props.symbolData.symbol) {
       tradingModeStore.symbols[x].monthlyTime = symbolMonthlyPrice;
@@ -509,6 +506,16 @@ function savePriceToStorage() {
   }
 
   dataIsUpdated.value = true;
+
+  if (!fs) {
+    return;
+  }
+
+  let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
+  const data = JSON.parse(fs.readFileSync(symbolPath, "utf-8"));
+
+  data["lastUpdated"] = Date.now();
+  data["monthlyTime"] = symbolMonthlyPrice;
 
   try {
     fs.writeFileSync(symbolPath, JSON.stringify(data));
@@ -519,23 +526,29 @@ function savePriceToStorage() {
 }
 
 function removeSymbol() {
-  let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
+  let indexToRemove;
+  for (let x = 0; x < tradingModeStore.symbols.length; x++) {
+    if (tradingModeStore.symbols[x]["symbol"] == props.symbolData.symbol) {
+      indexToRemove = x;
+      break;
+    }
+  }
 
+  if (indexToRemove !== undefined) {
+    tradingModeStore.symbols.splice(indexToRemove, 1);
+  }
+
+  if (!fs) {
+    return;
+  }
+
+  let symbolPath = `./src/storage/symbols/${props.symbolData.symbol}.json`;
   fs.unlink(symbolPath, (err) => {
     if (err) {
       console.error("An error occurred while deleting the file:", err);
-      return;
+    } else {
+      console.log(`${props.symbolData.symbol} was deleted successfully.`);
     }
-    //get the index of the removed symbol from tradingModeStore for removal
-    let indexToRemove;
-    for (let x = 0; x < tradingModeStore.symbols.length; x++) {
-      if (tradingModeStore.symbols[x]["symbol"] == props.symbolData.symbol) {
-        indexToRemove = x;
-        break;
-      }
-    }
-    tradingModeStore.symbols.splice(indexToRemove, 1);
-    console.log(`${props.symbolData.symbol} was deleted successfully.`);
   });
 }
 
@@ -655,7 +668,7 @@ body img {
 }
 
 .T4 {
-  color: #dddddd;
+  color: #333333;
 }
 
 .f12 {
@@ -674,7 +687,7 @@ body img {
   cursor: pointer;
 }
 .BLUE {
-  color: white;
+  color: #000;
 }
 .ml24 {
   margin-left: 24px;
@@ -682,13 +695,13 @@ body img {
 
 .uncolored-box {
   border: 0.5px solid #ff4d4d;
-  color: white;
+  color: #000;
   padding: 8px 21px;
   background: rgba(255, 0, 0, 0.08);
 }
 
 .star {
-  color: #ffffff;
+  color: #000;
   width: 20px;
   height: 20px;
   display: grid;
@@ -707,7 +720,7 @@ body img {
 .grayedOut {
   border: 2px solid #666;
   border-image: none;
-  background: #120000;
+  background: #f3f3f3;
 }
 
 .glow {
@@ -718,12 +731,12 @@ body img {
 @keyframes glow {
   0% {
     opacity: 0;
-    background-color: #2c0000;
+    background-color: #ffe5e5;
   }
 
   100% {
     opacity: 1;
-    background-color: #100000;
+    background-color: #ffffff;
   }
 }
 .red-highlight:hover {

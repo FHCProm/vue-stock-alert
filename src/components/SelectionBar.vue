@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="hasSelectedSymbols"
     id="scroll-container"
     class="style-scope ytd-feed-filter-chip-bar-renderer"
     style="touch-action: pan-y"
@@ -74,9 +75,12 @@
 
 <script setup>
 import { useTradingMode } from "@/stores/TradingMode";
-import { watch } from "vue";
+import { computed } from "vue";
 import ProgressBar from "./ProgressBar.vue";
 const tradingModeStore = useTradingMode();
+const hasSelectedSymbols = computed(
+  () => tradingModeStore.symbols.length > 0
+);
 
 function handleClick(optionNumber) {
   const tabs = document.querySelectorAll('[role="tab"]');
@@ -107,7 +111,7 @@ function handleClick(optionNumber) {
   overflow: hidden;
   display: flex;
   justify-content: space-between;
-  background: #120000;
+  background: #ffffff;
   border: 1px solid #ff4d4d;
   border-radius: 12px;
   padding: 10px 8px;
@@ -144,8 +148,8 @@ yt-chip-cloud-chip-renderer[chip-style="STYLE_REFRESH_TO_NOVEL_CHIP"] {
 yt-chip-cloud-chip-renderer[chip-style="STYLE_DEFAULT"],
 yt-chip-cloud-chip-renderer[chip-style="STYLE_HOME_FILTER"],
 yt-chip-cloud-chip-renderer[chip-style="STYLE_REFRESH_TO_NOVEL_CHIP"] {
-  background-color: #2c0000;
-  color: white;
+  background-color: #fff0f0;
+  color: #000;
   padding: 0 12px;
   transition: background-color 0.5s cubic-bezier(0.05, 0, 0, 1);
 }
@@ -176,7 +180,8 @@ yt-chip-cloud-chip-renderer {
 .progressBar-style {
   display: flex;
   align-items: center;
-  background: #120000;
+  background: #ffffff;
+  border: 1px solid #ddd;
   border-radius: 8px;
   padding: 8px 12px;
 }

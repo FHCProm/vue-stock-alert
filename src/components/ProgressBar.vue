@@ -49,17 +49,17 @@ const dataIsFullyLoaded = computed(() => {
 .loader-wrapper {
   display: flex;
   align-items: center;
-  background: #120000;
-  border: 1px solid #ff4d4d;
+  background: #ffffff;
+  border: 1px solid #ddd;
   border-radius: 10px;
   padding: 8px 10px;
 }
 .loader-words {
   padding-right: 0.5rem;
-  color: white;
+  color: #000;
 }
 .loader {
-  border: 3px solid #333;
+  border: 3px solid #ccc;
   border-top: 3px solid #ff0000;
   border-radius: 50%;
   width: 15px;

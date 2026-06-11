@@ -1,5 +1,5 @@
 <template>
-  <div class="wallet mt20 br12 svelte-o95zkd">
+  <div v-if="hasSelectedSymbols" class="wallet mt20 br12 svelte-o95zkd">
     <div class="table-header">
       <div
         data-selected="false"
@@ -47,11 +47,14 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import SingleStockRecord from "./SingleStockRecord.vue";
 import { useTradingMode } from "@/stores/TradingMode";
 
 const tradingModeStore = useTradingMode();
+const hasSelectedSymbols = computed(
+  () => tradingModeStore.symbols.length > 0
+);
 
 let currentlySelected = ref(10);
 function arrangeList(option, event) {
@@ -73,7 +76,8 @@ const stockRecordReference = ref(null);
 
 <style scoped>
 .wallet.svelte-o95zkd.svelte-o95zkd {
-  background: #100000;
+  background: #ffffff;
+  border: 1px solid #ddd;
 }
 
 .br12 {
@@ -87,8 +91,8 @@ const stockRecordReference = ref(null);
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 114px;
   min-width: 900px;
   padding: 10px 16px;
-  border-bottom: 1px solid white;
-  color: white;
+  border-bottom: 1px solid #ccc;
+  color: #000;
 }
 
 .table-header > div {
@@ -97,6 +101,7 @@ const stockRecordReference = ref(null);
   width: min-content;
   white-space: nowrap;
   position: relative;
+  color: #000;
 }
 .table-header > div::after {
   content: "";

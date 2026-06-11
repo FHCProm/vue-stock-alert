@@ -1,15 +1,20 @@
 <template>
   <SearchBar></SearchBar>
-  <SelectionBar></SelectionBar>
-  <StockList ref="stockListReference"></StockList>
+  <SelectionBar v-if="hasSelectedSymbols"></SelectionBar>
+  <StockList v-if="hasSelectedSymbols" ref="stockListReference"></StockList>
 </template>
 
 <script setup>
 import SearchBar from "./components/SearchBar.vue";
 import StockList from "./components/StockList.vue";
 import SelectionBar from "./components/SelectionBar.vue";
+import { computed, onMounted, ref } from "vue";
+import { useTradingMode } from "./stores/TradingMode";
 
-import { onMounted, ref } from "vue";
+const tradingModeStore = useTradingMode();
+const hasSelectedSymbols = computed(
+  () => tradingModeStore.symbols.length > 0
+);
 
 const moment = require("moment");
 

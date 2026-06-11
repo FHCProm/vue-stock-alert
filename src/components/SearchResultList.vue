@@ -37,20 +37,23 @@ const selectedIndex = ref(0);
   display: flex;
   padding-bottom: 4px;
   position: relative;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  margin-bottom: 8px;
 }
 
 .DocSearch-Hit a {
-  background: #140101;
+  background: transparent;
   border-radius: 4px;
   text-decoration: none;
   display: block;
   padding-left: 12px;
   width: 100%;
-  color: white;
+  color: #000;
 }
 
 .DocSearch-Hit[aria-selected="true"] a {
-  background-color: #ff0000;
-  color: white;
+  background-color: #ffe5e5;
+  color: #000;
 }
 </style>
